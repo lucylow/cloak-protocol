@@ -1,0 +1,59 @@
+[package]
+name = "cloak-backend"
+version = "0.1.0"
+edition = "2021"
+authors = ["Cloak Protocol Team"]
+description = "Rust backend for Cloak Protocol ZK-Privacy DEX for RWAs"
+
+[dependencies]
+# Async runtime
+tokio = { version = "1.35", features = ["full"] }
+
+# HTTP server
+axum = "0.7"
+tower-http = { version = "0.5", features = ["cors"] }
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1.0", features = ["v4", "serde"] }
+
+# gRPC and serialization
+tonic = "0.11"
+prost = "0.12"
+
+# Cryptography and ZK
+ark-ff = "0.4"
+ark-ec = "0.4"
+ark-poly = "0.4"
+ark-relations = "0.4"
+ark-std = "0.4"
+ark-serialize = "0.4"
+poseidon-rs = "0.0.6"
+
+# Ethereum/Web3 integration
+ethers = { version = "2.0", features = ["rustls"] }
+
+# Database
+rocksdb = "0.21"
+
+# HTTP client
+reqwest = { version = "0.11", features = ["json"] }
+
+# JSON serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Logging and tracing
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# Utilities
+hex = "0.4"
+thiserror = "1.0"
+anyhow = "1.0"
+once_cell = "1.19"
+
+[dev-dependencies]
+tokio-test = "0.4"
+
+[profile.release]
+opt-level = 3
+lto = true

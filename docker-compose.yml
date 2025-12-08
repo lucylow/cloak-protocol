@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  # Rust Backend API Server
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: cloak-backend
+    ports:
+      - "8080:8080"  # REST API
+      - "50051:50051"  # gRPC
+      - "9090:9090"  # Prometheus metrics
+    environment:
+      - RUST_LOG=debug
+      - PSY_RPC_URL=https://testnet-rpc.psy.xyz
+      - VERIFIER_CONTRACT_ADDRESS=0x1234567890123456789012345678901234567890
+      - DATABASE_PATH=/data/cloak_state.db
+    volumes:
+      - backend-data:/data
+    networks:
+      - cloak-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Next.js Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: cloak-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://backend:8080
+      - NEXT_PUBLIC_WS_URL=ws://backend:8080/ws
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - cloak-network
+
+  # Local Psy Testnet Validator (Optional for local development)
+  # Uncomment to run a local Psy devnet node
+  # psy-testnet:
+  #   image: psyprotocol/testnet:latest
+  #   container_name: psy-testnet
+  #   ports:
+  #     - "8545:8545"  # RPC
+  #     - "8546:8546"  # WebSocket
+  #   networks:
+  #     - cloak-network
+
+volumes:
+  backend-data:
+    driver: local
+
+networks:
+  cloak-network:
+    driver: bridge

@@ -1,0 +1,68 @@
+//! Cloak Protocol Backend - Main Entry Point
+//!
+//! Initializes and runs the Cloak Protocol node with API server.
+//! Connects to Psy Protocol testnet and starts the event loop.
+
+use cloak_backend::{CloakConfig, CloakNode, ApiServer};
+use std::sync::Arc;
+use tracing::{info, error};
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Initialize logging
+    tracing_subscriber::fmt()
+        .with_max_level(tracing::Level::DEBUG)
+        .init();
+
+    info!("Starting Cloak Protocol Backend v{}", cloak_backend::VERSION);
+
+    // Load configuration (default or from environment)
+    let config = CloakConfig::default();
+    info!("Configuration loaded:");
+    info!("  Psy RPC URL: {}", config.psy_rpc_url);
+    info!("  API Bind Address: {}", config.api_bind_addr);
+    info!("  Database Path: {}", config.db_path);
+
+    // Initialize the Cloak node
+    let node = match CloakNode::new(&config.psy_rpc_url, &config.db_path).await {
+        Ok(node) => {
+            info!("Cloak node initialized successfully");
+            Arc::new(node)
+        }
+        Err(e) => {
+            error!("Failed to initialize Cloak node: {}", e);
+            return Err(e);
+        }
+    };
+
+    // Initialize the API server
+    let api_server = ApiServer::new(node.clone(), config.api_bind_addr.clone());
+    info!("API server initialized on {}", config.api_bind_addr);
+
+    // Spawn the API server in a background task
+    let api_server_handle = {
+        let api_server = api_server.clone();
+        tokio::spawn(async move {
+            if let Err(e) = api_server.start().await {
+                error!("API server error: {}", e);
+            }
+        })
+    };
+
+    // Start the node's event loop
+    info!("Starting Cloak node event loop");
+    match node.start_event_loop().await {
+        Ok(_) => {
+            info!("Event loop completed");
+        }
+        Err(e) => {
+            error!("Event loop error: {}", e);
+            return Err(e);
+        }
+    }
+
+    // Wait for API server to complete (it runs indefinitely)
+    let _ = api_server_handle.await;
+
+    Ok(())
+}
