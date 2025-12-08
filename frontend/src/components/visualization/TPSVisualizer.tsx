@@ -11,8 +11,8 @@ interface BatchTransaction {
 }
 
 const statusConfig = {
-  pending: { color: 'bg-yellow-500/20 text-yellow-400', Icon: Clock },
-  aggregating: { color: 'bg-blue-500/20 text-blue-400', Icon: Layers },
+  pending: { color: 'bg-gray-400/20 text-gray-300', Icon: Clock },
+  aggregating: { color: 'bg-white/20 text-white', Icon: Layers },
   settling: { color: 'bg-primary/20 text-primary', Icon: Package },
   completed: { color: 'bg-accent/20 text-accent', Icon: TrendingUp }
 };
@@ -55,22 +55,22 @@ export const TPSVisualizer: React.FC = () => {
   }, []);
 
   return (
-    <div className="glass rounded-xl p-6 shadow-glow border-blue-500/20">
+    <div className="glass rounded-xl p-6 shadow-glow border-white/20">
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-xl font-bold flex items-center gap-2">
-          <Zap className="h-6 w-6 text-blue-400" />
+          <Zap className="h-6 w-6 text-white" />
           PARTH High-TPS Engine
         </h3>
-        <div className="px-4 py-2 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+        <div className="px-4 py-2 bg-white/10 border border-white/20 rounded-lg">
           <motion.div 
-            className="text-2xl font-bold text-blue-400"
+            className="text-2xl font-bold text-white"
             key={liveTps}
             initial={{ scale: 1.1 }}
             animate={{ scale: 1 }}
           >
             {liveTps.toLocaleString()} TPS
           </motion.div>
-          <div className="text-xs text-blue-300/70">Live Throughput</div>
+          <div className="text-xs text-gray-300/70">Live Throughput</div>
         </div>
       </div>
 
@@ -92,7 +92,7 @@ export const TPSVisualizer: React.FC = () => {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.1 }}
-                className="p-4 bg-secondary/50 rounded-lg border border-border hover:border-blue-500/30 transition-colors"
+                className="p-4 bg-secondary/50 rounded-lg border border-border hover:border-white/30 transition-colors"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -125,7 +125,7 @@ export const TPSVisualizer: React.FC = () => {
                     </div>
                     <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
                       <motion.div
-                        className="h-full bg-gradient-to-r from-blue-500 to-primary"
+                        className="h-full bg-gradient-to-r from-white to-primary"
                         initial={{ width: '0%' }}
                         animate={{ 
                           width: batch.status === 'pending' ? '25%' : 

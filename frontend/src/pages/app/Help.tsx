@@ -116,28 +116,28 @@ const helpResources = [
     description: 'Comprehensive guides and API reference',
     icon: Book,
     href: '/app/docs',
-    color: 'text-blue-500',
+    color: 'text-white',
   },
   {
     title: 'Video Tutorials',
     description: 'Step-by-step video guides',
     icon: Video,
     href: '#',
-    color: 'text-purple-500',
+    color: 'text-white',
   },
   {
     title: 'Developer Guide',
     description: 'Integration guides for developers',
     icon: Code,
     href: '#',
-    color: 'text-green-500',
+    color: 'text-white',
   },
   {
     title: 'Community Discord',
     description: 'Join our community for support',
     icon: MessageSquare,
     href: '#',
-    color: 'text-pink-500',
+    color: 'text-white',
   },
 ];
 

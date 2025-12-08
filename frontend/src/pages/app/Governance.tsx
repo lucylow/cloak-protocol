@@ -25,16 +25,16 @@ import { ProposalDetailSheet } from '@/components/governance/ProposalDetailSheet
 
 const statusConfig = {
   active: { icon: Clock, color: 'text-accent', bg: 'bg-accent/10', label: 'Active' },
-  passed: { icon: CheckCircle2, color: 'text-green-400', bg: 'bg-green-400/10', label: 'Passed' },
+  passed: { icon: CheckCircle2, color: 'text-white', bg: 'bg-white/10', label: 'Passed' },
   rejected: { icon: XCircle, color: 'text-destructive', bg: 'bg-destructive/10', label: 'Rejected' },
-  pending: { icon: AlertCircle, color: 'text-yellow-400', bg: 'bg-yellow-400/10', label: 'Pending' },
+  pending: { icon: AlertCircle, color: 'text-gray-400', bg: 'bg-gray-400/10', label: 'Pending' },
 };
 
 const categoryColors = {
   protocol: 'bg-primary/20 text-primary border-primary/30',
   treasury: 'bg-accent/20 text-accent border-accent/30',
-  governance: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
-  security: 'bg-red-500/20 text-red-400 border-red-500/30',
+  governance: 'bg-white/20 text-white border-white/30',
+  security: 'bg-white/20 text-white border-white/30',
 };
 
 export default function GovernancePage() {
@@ -168,12 +168,12 @@ export default function GovernancePage() {
             {/* Vote Progress */}
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-green-400">For: {formatNumber(proposal.votesFor)}</span>
+                <span className="text-white">For: {formatNumber(proposal.votesFor)}</span>
                 <span className="text-destructive">Against: {formatNumber(proposal.votesAgainst)}</span>
               </div>
               <div className="h-2 rounded-full bg-muted overflow-hidden flex">
                 <div 
-                  className="bg-green-400 transition-all"
+                  className="bg-white transition-all"
                   style={{ width: `${forPercent}%` }}
                 />
                 <div 
@@ -206,7 +206,7 @@ export default function GovernancePage() {
                   <Button 
                     size="sm" 
                     variant="outline"
-                    className="h-7 text-xs border-green-500/30 text-green-400 hover:bg-green-500/10"
+                    className="h-7 text-xs border-white/30 text-white hover:bg-white/10"
                     onClick={() => handleVote(proposal.id, 'for')}
                     disabled={votingId === proposal.id}
                   >
@@ -277,8 +277,8 @@ export default function GovernancePage() {
         <Card className="bg-card/50">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-green-500/10 flex items-center justify-center">
-                <TrendingUp className="h-5 w-5 text-green-400" />
+              <div className="h-10 w-10 rounded-lg bg-white/10 flex items-center justify-center">
+                <TrendingUp className="h-5 w-5 text-white" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{stats.participationRate}%</p>
@@ -290,8 +290,8 @@ export default function GovernancePage() {
         <Card className="bg-card/50">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-purple-500/10 flex items-center justify-center">
-                <Users className="h-5 w-5 text-purple-400" />
+              <div className="h-10 w-10 rounded-lg bg-white/10 flex items-center justify-center">
+                <Users className="h-5 w-5 text-white" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{formatNumber(stats.totalVoters)}</p>

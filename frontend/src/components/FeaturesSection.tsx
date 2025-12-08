@@ -6,37 +6,37 @@ const features = [
     icon: UserCheck,
     title: "End-to-End Privacy",
     description: "Your trades are completely confidential. Zero-knowledge proofs validate transactions without revealing amounts, parties, or portfolio details.",
-    gradient: "from-purple-500 to-pink-500",
+    gradient: "from-white to-gray-400",
   },
   {
     icon: Gem,
     title: "RWA-Focused",
     description: "Specialized infrastructure for Real-World Assets with compliance-ready features, permissioned pools, and institutional liquidity.",
-    gradient: "from-blue-500 to-cyan-500",
+    gradient: "from-white to-gray-500",
   },
   {
     icon: Zap,
     title: "Million+ TPS Scalability",
     description: "Built on Psy Protocol's PARTH architecture for high-frequency trading without compromising decentralization or security.",
-    gradient: "from-yellow-500 to-orange-500",
+    gradient: "from-gray-300 to-gray-600",
   },
   {
     icon: Shield,
     title: "Programmable Identities",
     description: "Leverage Psy's SDKeys for private, verifiable credentials that enable access to permissioned RWA pools without KYC exposure.",
-    gradient: "from-green-500 to-emerald-500",
+    gradient: "from-gray-200 to-gray-500",
   },
   {
     icon: RefreshCw,
     title: "Cross-Chain Compatibility",
     description: "Trade RWAs from multiple chains with our privacy-preserving bridges. Bring your assets from Ethereum, Solana, and more.",
-    gradient: "from-indigo-500 to-purple-500",
+    gradient: "from-white to-gray-400",
   },
   {
     icon: PieChart,
     title: "Institutional Tools",
     description: "Advanced order types, dark pool functionality, portfolio analytics, and reporting tools designed for professional investors.",
-    gradient: "from-rose-500 to-red-500",
+    gradient: "from-gray-300 to-gray-600",
   },
 ];
 
@@ -59,7 +59,7 @@ export const FeaturesSection = () => {
   return (
     <section id="features" className="py-24 relative overflow-hidden">
       {/* Background decoration */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(45,212,191,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(45,212,191,0.02)_1px,transparent_1px)] bg-[size:60px_60px]" />
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:60px_60px]" />
       
       <div className="container relative">
         <motion.div 

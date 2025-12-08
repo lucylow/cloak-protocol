@@ -49,9 +49,9 @@ export const IntegrationSection = () => {
 
   const getStatusColor = (status: BatchStatus['status']) => {
     const colors = {
-      aggregating: 'bg-blue-500/20 text-blue-400',
+      aggregating: 'bg-white/20 text-white',
       proving: 'bg-primary/20 text-primary',
-      mining: 'bg-yellow-500/20 text-yellow-400',
+      mining: 'bg-gray-400/20 text-gray-300',
       settled: 'bg-accent/20 text-accent'
     };
     return colors[status];

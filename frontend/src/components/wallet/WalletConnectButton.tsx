@@ -41,8 +41,8 @@ export function WalletConnectButton() {
         disabled={isConnecting}
         className={cn(
           "gap-2 font-semibold transition-all duration-300",
-          "bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600",
-          "text-white shadow-lg hover:shadow-orange-500/25",
+          "bg-gradient-to-r from-white to-gray-400 hover:from-gray-200 hover:to-gray-500",
+          "text-black shadow-lg hover:shadow-white/25",
           isConnecting && "opacity-80"
         )}
       >

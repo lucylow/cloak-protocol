@@ -125,30 +125,30 @@ const Security = () => {
 
       {/* Security Overview */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="bg-green-500/10 border-green-500/20">
+        <Card className="bg-white/10 border-white/20">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-green-500">Security Score</CardTitle>
+            <CardTitle className="text-sm font-medium text-white">Security Score</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-green-500">98/100</div>
+            <div className="text-3xl font-bold text-white">98/100</div>
             <p className="text-xs text-muted-foreground mt-1">Industry-leading security standards</p>
           </CardContent>
         </Card>
-        <Card className="bg-blue-500/10 border-blue-500/20">
+        <Card className="bg-white/10 border-white/20">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-blue-500">Audits Completed</CardTitle>
+            <CardTitle className="text-sm font-medium text-white">Audits Completed</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-blue-500">{audits.length}</div>
+            <div className="text-3xl font-bold text-white">{audits.length}</div>
             <p className="text-xs text-muted-foreground mt-1">Security audits by top firms</p>
           </CardContent>
         </Card>
-        <Card className="bg-purple-500/10 border-purple-500/20">
+        <Card className="bg-white/10 border-white/20">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-purple-500">Bug Bounty Pool</CardTitle>
+            <CardTitle className="text-sm font-medium text-white">Bug Bounty Pool</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-purple-500">${(bugBounty.totalRewards / 1000).toFixed(0)}K</div>
+            <div className="text-3xl font-bold text-white">${(bugBounty.totalRewards / 1000).toFixed(0)}K</div>
             <p className="text-xs text-muted-foreground mt-1">Rewards for security researchers</p>
           </CardContent>
         </Card>
@@ -175,7 +175,7 @@ const Security = () => {
                 <div className="flex-1 space-y-1">
                   <div className="flex items-center gap-2">
                     <h3 className="font-semibold">{feature.title}</h3>
-                    <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20">
+                    <Badge variant="outline" className="bg-white/10 text-white border-white/20">
                       <CheckCircle2 className="h-3 w-3 mr-1" />
                       Active
                     </Badge>
@@ -214,7 +214,7 @@ const Security = () => {
                           <h3 className="font-semibold text-lg">{audit.firm}</h3>
                           <Badge
                             variant="outline"
-                            className="bg-green-500/10 text-green-500 border-green-500/20"
+                            className="bg-white/10 text-white border-white/20"
                           >
                             <CheckCircle2 className="h-3 w-3 mr-1" />
                             {audit.status.charAt(0).toUpperCase() + audit.status.slice(1)}
@@ -228,19 +228,19 @@ const Security = () => {
                         </p>
                         <div className="flex gap-4 pt-2">
                           <div className="text-sm">
-                            <span className="font-medium text-red-500">Critical:</span>{' '}
+                            <span className="font-medium text-white">Critical:</span>{' '}
                             {audit.severity.critical}
                           </div>
                           <div className="text-sm">
-                            <span className="font-medium text-orange-500">High:</span>{' '}
+                            <span className="font-medium text-white">High:</span>{' '}
                             {audit.severity.high}
                           </div>
                           <div className="text-sm">
-                            <span className="font-medium text-yellow-500">Medium:</span>{' '}
+                            <span className="font-medium text-white">Medium:</span>{' '}
                             {audit.severity.medium}
                           </div>
                           <div className="text-sm">
-                            <span className="font-medium text-blue-500">Low:</span>{' '}
+                            <span className="font-medium text-white">Low:</span>{' '}
                             {audit.severity.low}
                           </div>
                         </div>
@@ -269,20 +269,20 @@ const Security = () => {
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="p-4 bg-red-500/10 rounded-lg border border-red-500/20">
-                  <div className="text-2xl font-bold text-red-500">${(bugBounty.critical / 1000).toFixed(0)}K</div>
+                <div className="p-4 bg-white/10 rounded-lg border border-white/20">
+                  <div className="text-2xl font-bold text-white">${(bugBounty.critical / 1000).toFixed(0)}K</div>
                   <p className="text-sm text-muted-foreground mt-1">Critical</p>
                 </div>
-                <div className="p-4 bg-orange-500/10 rounded-lg border border-orange-500/20">
-                  <div className="text-2xl font-bold text-orange-500">${(bugBounty.high / 1000).toFixed(0)}K</div>
+                <div className="p-4 bg-white/10 rounded-lg border border-white/20">
+                  <div className="text-2xl font-bold text-white">${(bugBounty.high / 1000).toFixed(0)}K</div>
                   <p className="text-sm text-muted-foreground mt-1">High</p>
                 </div>
-                <div className="p-4 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
-                  <div className="text-2xl font-bold text-yellow-500">${(bugBounty.medium / 1000).toFixed(0)}K</div>
+                <div className="p-4 bg-white/10 rounded-lg border border-white/20">
+                  <div className="text-2xl font-bold text-white">${(bugBounty.medium / 1000).toFixed(0)}K</div>
                   <p className="text-sm text-muted-foreground mt-1">Medium</p>
                 </div>
-                <div className="p-4 bg-blue-500/10 rounded-lg border border-blue-500/20">
-                  <div className="text-2xl font-bold text-blue-500">${(bugBounty.low / 1000).toFixed(0)}K</div>
+                <div className="p-4 bg-white/10 rounded-lg border border-white/20">
+                  <div className="text-2xl font-bold text-white">${(bugBounty.low / 1000).toFixed(0)}K</div>
                   <p className="text-sm text-muted-foreground mt-1">Low</p>
                 </div>
               </div>
@@ -350,7 +350,7 @@ const Security = () => {
                 </div>
 
                 <div className="flex gap-4 p-4 rounded-lg border bg-card">
-                  <AlertTriangle className="h-5 w-5 text-yellow-500 shrink-0 mt-0.5" />
+                  <AlertTriangle className="h-5 w-5 text-white shrink-0 mt-0.5" />
                   <div className="space-y-1">
                     <h3 className="font-semibold">Beware of Phishing</h3>
                     <p className="text-sm text-muted-foreground">
@@ -372,7 +372,7 @@ const Security = () => {
                 </div>
 
                 <div className="flex gap-4 p-4 rounded-lg border bg-card">
-                  <CheckCircle2 className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
+                  <CheckCircle2 className="h-5 w-5 text-white shrink-0 mt-0.5" />
                   <div className="space-y-1">
                     <h3 className="font-semibold">Keep Software Updated</h3>
                     <p className="text-sm text-muted-foreground">

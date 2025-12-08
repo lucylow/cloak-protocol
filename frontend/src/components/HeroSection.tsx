@@ -42,7 +42,7 @@ export const HeroSection = () => {
         />
         
         {/* Animated grid lines */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(139,92,246,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(139,92,246,0.03)_1px,transparent_1px)] bg-[size:100px_100px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,black_40%,transparent_100%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:100px_100px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,black_40%,transparent_100%)]" />
       </div>
       
       <div className="container relative z-10">
@@ -184,7 +184,7 @@ export const HeroSection = () => {
               {/* Bottom stats */}
               <div className="grid grid-cols-2 gap-4 mt-6">
                 <div className="p-3 bg-secondary/30 rounded-lg text-center">
-                  <div className="text-lg font-bold text-blue-400">1,247 TPS</div>
+                  <div className="text-lg font-bold text-white">1,247 TPS</div>
                   <div className="text-xs text-muted-foreground">Current Throughput</div>
                 </div>
                 <div className="p-3 bg-secondary/30 rounded-lg text-center">

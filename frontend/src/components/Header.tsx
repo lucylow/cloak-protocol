@@ -37,8 +37,12 @@ export const Header = () => {
     >
       <div className="container flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2.5 text-xl font-bold text-foreground group">
-          <div className="w-9 h-9 rounded-lg bg-gradient-primary flex items-center justify-center group-hover:shadow-glow transition-shadow">
-            <Shield className="w-5 h-5 text-primary-foreground" />
+          <div className="w-9 h-9 rounded-lg flex items-center justify-center group-hover:shadow-glow transition-shadow overflow-hidden">
+            <img 
+              src="/logo.svg" 
+              alt="Cloak Protocol Logo" 
+              className="w-full h-full object-contain"
+            />
           </div>
           <span className="hidden sm:inline">Cloak Protocol</span>
         </Link>
