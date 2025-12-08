@@ -5,6 +5,7 @@ import { DualViewTransactionHistory } from '@/components/dashboard/DualViewHisto
 import { MarketStats } from '@/components/dashboard/MarketStats';
 import { PrivacyStatusVisualizer } from '@/components/status/PrivacyStatus';
 import { TPSVisualizer } from '@/components/visualization/TPSVisualizer';
+import { PsyFeatures } from '@/components/dashboard/PsyFeatures';
 import { Shield, Zap, BarChart3, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { EducationalCallout } from '@/components/ui/privacy-indicators';
@@ -111,6 +112,9 @@ const DashboardContent = memo(({ sdKey, onConnect }: DashboardContentProps) => {
         <PrivacyStatusVisualizer />
         <TPSVisualizer />
       </div>
+
+      {/* Psy Protocol Features */}
+      <PsyFeatures />
 
       {/* Main Dashboard */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

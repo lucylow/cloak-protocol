@@ -8,6 +8,7 @@ use crate::node::CloakNode;
 use crate::api::{HealthCheckResponse, QueryStateRequest, QueryStateResponse, SubmitProofRequest, SubmitProofResponse};
 use std::sync::Arc;
 use tracing::{debug, info, warn};
+use hex;
 
 /// The Cloak Protocol API Server
 #[derive(Clone)]
