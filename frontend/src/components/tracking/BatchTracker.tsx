@@ -14,8 +14,8 @@ interface SettlementBatch {
 const statusInfo = {
   aggregating: { 
     label: 'Aggregating Proofs', 
-    color: 'text-blue-400', 
-    bg: 'bg-blue-500/20',
+    color: 'text-white', 
+    bg: 'bg-white/20',
     Icon: Users,
     description: 'Collecting ZK proofs from users'
   },
@@ -28,8 +28,8 @@ const statusInfo = {
   },
   mining: { 
     label: 'PoW 2.0 Verification', 
-    color: 'text-yellow-400', 
-    bg: 'bg-yellow-500/20',
+    color: 'text-gray-300', 
+    bg: 'bg-gray-400/20',
     Icon: TrendingUp,
     description: 'Miners verifying batch proof (Useful Work)'
   },

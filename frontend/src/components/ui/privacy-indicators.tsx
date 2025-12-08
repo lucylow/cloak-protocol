@@ -24,7 +24,7 @@ export const PrivacyBadge = ({ type, size = 'sm', showLabel = true }: PrivacyBad
           size === 'sm' ? "px-2 py-0.5 text-xs" : "px-3 py-1 text-sm",
           isPrivate 
             ? "bg-accent/10 text-accent border border-accent/20" 
-            : "bg-blue-500/10 text-blue-400 border border-blue-500/20"
+            : "bg-white/10 text-white border border-white/20"
         )}>
           {isPrivate ? <Lock className="h-3 w-3" /> : <Globe className="h-3 w-3" />}
           {showLabel && (isPrivate ? 'Private' : 'Public')}
@@ -81,9 +81,9 @@ export const EducationalCallout = ({
 }: EducationalCalloutProps) => {
   const variants = {
     info: {
-      bg: 'bg-blue-500/5 border-blue-500/20',
-      icon: <Info className="h-4 w-4 text-blue-400" />,
-      iconBg: 'bg-blue-500/10'
+      bg: 'bg-white/5 border-white/20',
+      icon: <Info className="h-4 w-4 text-white" />,
+      iconBg: 'bg-white/10'
     },
     privacy: {
       bg: 'bg-accent/5 border-accent/20',
@@ -91,9 +91,9 @@ export const EducationalCallout = ({
       iconBg: 'bg-accent/10'
     },
     warning: {
-      bg: 'bg-yellow-500/5 border-yellow-500/20',
-      icon: <Info className="h-4 w-4 text-yellow-400" />,
-      iconBg: 'bg-yellow-500/10'
+      bg: 'bg-gray-400/5 border-gray-400/20',
+      icon: <Info className="h-4 w-4 text-gray-300" />,
+      iconBg: 'bg-gray-400/10'
     }
   };
 
@@ -191,13 +191,13 @@ export const DataVisibilityIndicator = ({ publicData, privateData }: DataVisibil
       
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <div className="flex items-center gap-1.5 text-xs text-blue-400">
+          <div className="flex items-center gap-1.5 text-xs text-white">
             <Globe className="h-3 w-3" />
             <span className="font-medium">Public (on-chain)</span>
           </div>
           <ul className="space-y-1">
             {publicData.map((item, i) => (
-              <li key={i} className="text-xs text-muted-foreground pl-4 border-l-2 border-blue-500/30">
+              <li key={i} className="text-xs text-muted-foreground pl-4 border-l-2 border-white/30">
                 {item}
               </li>
             ))}

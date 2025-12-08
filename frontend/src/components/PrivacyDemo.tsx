@@ -19,7 +19,7 @@ type ProofPhase = 'idle' | 'computing' | 'proving' | 'verifying' | 'complete';
 
 const phaseDetails: Record<ProofPhase, { title: string; color: string; desc: string }> = {
   idle: { title: 'Ready for Private Trade', color: 'text-muted-foreground', desc: 'Click to generate ZK proof locally' },
-  computing: { title: 'Computing Locally', color: 'text-blue-400', desc: 'Processing trade data on your device' },
+  computing: { title: 'Computing Locally', color: 'text-white', desc: 'Processing trade data on your device' },
   proving: { title: 'Generating ZK Proof', color: 'text-primary', desc: 'Creating cryptographic proof (data stays local)' },
   verifying: { title: 'Verifying Proof', color: 'text-accent', desc: 'Validating proof integrity' },
   complete: { title: 'Proof Ready', color: 'text-accent', desc: 'Proof generated locally, ready for submission' }

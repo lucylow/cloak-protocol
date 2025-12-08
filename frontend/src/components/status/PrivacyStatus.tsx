@@ -11,7 +11,7 @@ interface ProofGenerationStatus {
 
 const phaseDetails = {
   idle: { title: 'Ready for Private Trade', Icon: Shield, color: 'text-muted-foreground', desc: 'Click to generate ZK proof locally' },
-  computing: { title: 'Computing Locally', Icon: Cpu, color: 'text-blue-400', desc: 'Processing trade data on your device' },
+  computing: { title: 'Computing Locally', Icon: Cpu, color: 'text-white', desc: 'Processing trade data on your device' },
   proving: { title: 'Generating ZK Proof', Icon: Lock, color: 'text-primary', desc: 'Creating cryptographic proof (data stays local)' },
   verifying: { title: 'Verifying Proof', Icon: CheckCircle, color: 'text-accent', desc: 'Validating proof integrity' },
   complete: { title: 'Proof Ready', Icon: Shield, color: 'text-accent', desc: 'Proof generated locally, ready for submission' }

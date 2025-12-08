@@ -150,7 +150,7 @@ export const DualViewTransactionHistory = () => {
 
               {/* Public View (always visible) */}
               <div className="mb-3 pb-3 border-b border-border">
-                <div className="flex items-center gap-1.5 text-xs text-blue-400 mb-2">
+                <div className="flex items-center gap-1.5 text-xs text-white mb-2">
                   <Globe className="h-3 w-3" />
                   <span className="font-medium">Public View</span>
                 </div>
@@ -161,7 +161,7 @@ export const DualViewTransactionHistory = () => {
                   </div>
                   <div>
                     <span className="text-muted-foreground">Verifier:</span>
-                    <button className="ml-2 font-mono text-blue-400 hover:underline inline-flex items-center gap-1">
+                    <button className="ml-2 font-mono text-white hover:underline inline-flex items-center gap-1">
                       {settlement.publicData.verifierContract}
                       <ExternalLink className="h-3 w-3" />
                     </button>
