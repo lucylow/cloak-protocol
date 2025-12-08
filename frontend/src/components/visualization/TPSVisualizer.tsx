@@ -145,7 +145,7 @@ export const TPSVisualizer: React.FC = () => {
       {/* Performance Metrics */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="p-4 bg-secondary/30 rounded-lg border border-border">
-          <div className="text-2xl font-bold text-blue-400">{pendingTransactions}</div>
+          <div className="text-2xl font-bold text-white">{pendingTransactions}</div>
           <div className="text-sm text-muted-foreground">Pending TX</div>
         </div>
         
@@ -160,17 +160,17 @@ export const TPSVisualizer: React.FC = () => {
         </div>
         
         <div className="p-4 bg-secondary/30 rounded-lg border border-border">
-          <div className="text-2xl font-bold text-yellow-400">64</div>
+          <div className="text-2xl font-bold text-gray-300">64</div>
           <div className="text-sm text-muted-foreground">Active Batches</div>
         </div>
       </div>
 
       {/* Explanatory Note */}
-      <div className="mt-6 p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+      <div className="mt-6 p-4 bg-white/10 border border-white/20 rounded-lg">
         <div className="flex items-start gap-3">
-          <Zap className="h-5 w-5 text-blue-400 mt-0.5 shrink-0" />
+          <Zap className="h-5 w-5 text-white mt-0.5 shrink-0" />
           <div className="text-sm">
-            <p className="font-medium text-blue-300">Psy's PARTH Architecture in Action</p>
+            <p className="font-medium text-white">Psy's PARTH Architecture in Action</p>
             <p className="text-muted-foreground mt-1">
               Transactions are batched and settled in parallel lanes, enabling million+ TPS.
               Each batch undergoes ZK-proof aggregation before final settlement.

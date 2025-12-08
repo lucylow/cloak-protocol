@@ -58,7 +58,7 @@ export const PsyFeatures = () => {
         <h3 className="font-semibold text-lg">Built on Psy Protocol</h3>
         {healthStatus && (
           <div className="flex items-center gap-2 px-3 py-1 bg-accent/10 border border-accent/20 rounded-full">
-            <div className={`h-2 w-2 rounded-full ${isPsyConnected ? 'bg-accent animate-pulse' : 'bg-yellow-500'}`} />
+            <div className={`h-2 w-2 rounded-full ${isPsyConnected ? 'bg-accent animate-pulse' : 'bg-gray-400'}`} />
             <span className="text-xs font-medium text-muted-foreground">
               {isPsyConnected ? 'Connected' : 'Connecting...'}
             </span>
