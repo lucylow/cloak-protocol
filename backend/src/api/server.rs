@@ -192,13 +192,6 @@ impl ApiServer {
             return Err(CloakError::invalid_input("Public inputs cannot be empty"));
         }
 
-        // Validate public inputs format (should be valid hex if provided as hex)
-        if let Err(e) = hex::decode(&request.public_inputs) {
-            return Err(CloakError::invalid_input(
-                format!("Invalid public inputs hex format: {}", e)
-            ));
-        }
-
         // Validate user SDKey hash format
         let _sdkey_hash = Self::parse_sdkey_hash(&request.user_sdkey_hash)
             .map_err(|e| {
