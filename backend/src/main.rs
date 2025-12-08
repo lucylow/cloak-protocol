@@ -3,12 +3,12 @@
 //! Initializes and runs the Cloak Protocol node with API server.
 //! Connects to Psy Protocol testnet and starts the event loop.
 
-use cloak_backend::{CloakConfig, CloakNode, ApiServer};
+use cloak_backend::{CloakConfig, CloakNode, ApiServer, CloakError};
 use std::sync::Arc;
 use tracing::{info, error};
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
+async fn main() -> Result<(), CloakError> {
     // Initialize logging
     tracing_subscriber::fmt()
         .with_max_level(tracing::Level::DEBUG)
@@ -24,16 +24,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     info!("  Database Path: {}", config.db_path);
 
     // Initialize the Cloak node
-    let node = match CloakNode::new(&config.psy_rpc_url, &config.db_path).await {
-        Ok(node) => {
-            info!("Cloak node initialized successfully");
-            Arc::new(node)
-        }
-        Err(e) => {
-            error!("Failed to initialize Cloak node: {}", e);
-            return Err(e);
-        }
-    };
+    let node = Arc::new(
+        CloakNode::new(&config.psy_rpc_url, &config.db_path).await
+            .map_err(|e| {
+                error!("Failed to initialize Cloak node: {}", e);
+                e
+            })?
+    );
+    info!("Cloak node initialized successfully");
 
     // Initialize the API server
     let api_server = ApiServer::new(node.clone(), config.api_bind_addr.clone());
@@ -51,15 +49,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Start the node's event loop
     info!("Starting Cloak node event loop");
-    match node.start_event_loop().await {
-        Ok(_) => {
-            info!("Event loop completed");
-        }
-        Err(e) => {
-            error!("Event loop error: {}", e);
-            return Err(e);
-        }
-    }
+    node.start_event_loop().await.map_err(|e| {
+        error!("Event loop error: {}", e);
+        e
+    })?;
+    info!("Event loop completed");
 
     // Wait for API server to complete (it runs indefinitely)
     let _ = api_server_handle.await;

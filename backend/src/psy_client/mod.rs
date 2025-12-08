@@ -3,6 +3,7 @@
 //! Provides client for interacting with Psy Protocol testnet via WebSocket and HTTP.
 //! Handles RPC method calls, proof verification, and state management.
 
+use crate::error::{CloakError, CloakResult};
 use serde::{Deserialize, Serialize};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
@@ -116,7 +117,7 @@ impl PsyClient {
     ///
     /// # Returns
     /// A new PsyClient instance
-    pub async fn new(rpc_url: &str) -> Result<Self, Box<dyn std::error::Error>> {
+    pub async fn new(rpc_url: &str) -> CloakResult<Self> {
         let client = Self {
             rpc_url: rpc_url.to_string(),
             http_client: reqwest::Client::new(),
@@ -134,6 +135,7 @@ impl PsyClient {
             Err(e) => {
                 warn!("Failed to connect to Psy Protocol testnet: {}", e);
                 // Still return client, but mark as disconnected
+                // This allows the system to start even if Psy is temporarily unavailable
                 Ok(client)
             }
         }
@@ -148,7 +150,7 @@ impl PsyClient {
     /// - Implement actual JSON-RPC call to Psy testnet
     /// - Handle WebSocket subscriptions for real-time updates
     /// - Add retry logic and connection pooling
-    pub async fn get_chain_state(&self) -> Result<PsyBlockHeader, Box<dyn std::error::Error>> {
+    pub async fn get_chain_state(&self) -> CloakResult<PsyBlockHeader> {
         debug!("Fetching chain state from Psy Protocol");
 
         // TODO: Implement actual JSON-RPC call
@@ -164,13 +166,16 @@ impl PsyClient {
         //     .await?;
 
         // Placeholder response for testing
+        let timestamp = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map_err(|e| CloakError::Other(format!("Failed to get timestamp: {}", e)))?
+            .as_secs();
+        
         Ok(PsyBlockHeader {
             height: 1000,
             hash: "0x0000000000000000000000000000000000000000000000000000000000000000".to_string(),
             parent_hash: "0x0000000000000000000000000000000000000000000000000000000000000001".to_string(),
-            timestamp: std::time::SystemTime::now()
-                .duration_since(std::time::UNIX_EPOCH)?
-                .as_secs(),
+            timestamp,
             transactions_root: "0x0000000000000000000000000000000000000000000000000000000000000002".to_string(),
             state_root: "0x0000000000000000000000000000000000000000000000000000000000000003".to_string(),
             difficulty: 1000000,
@@ -196,7 +201,7 @@ impl PsyClient {
         &self,
         _proof_data: Vec<u8>,
         _public_inputs: Vec<u8>,
-    ) -> Result<ProofSubmissionResponse, Box<dyn std::error::Error>> {
+    ) -> CloakResult<ProofSubmissionResponse> {
         debug!("Submitting proof to Psy verifier contract");
 
         // TODO: Encode proof into contract call
@@ -229,7 +234,7 @@ impl PsyClient {
         &self,
         _proof_data: Vec<u8>,
         _public_inputs: Vec<u8>,
-    ) -> Result<ProofVerificationResult, Box<dyn std::error::Error>> {
+    ) -> CloakResult<ProofVerificationResult> {
         debug!("Verifying proof against Psy verifier contract");
 
         // TODO: Call Psy verifier contract
@@ -253,7 +258,7 @@ impl PsyClient {
     /// - Implement WebSocket subscription
     /// - Add reconnection logic
     /// - Add filter for relevant blocks
-    pub async fn subscribe_blocks(&self) -> Result<tokio::sync::mpsc::UnboundedReceiver<PsyBlockHeader>, Box<dyn std::error::Error>> {
+    pub async fn subscribe_blocks(&self) -> CloakResult<tokio::sync::mpsc::UnboundedReceiver<PsyBlockHeader>> {
         debug!("Subscribing to block headers from Psy Protocol");
 
         let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
@@ -264,13 +269,16 @@ impl PsyClient {
         // Spawn task to listen for block updates
 
         // Placeholder: send a test block
+        let timestamp = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map_err(|e| CloakError::Other(format!("Failed to get timestamp: {}", e)))?
+            .as_secs();
+        
         let _ = tx.send(PsyBlockHeader {
             height: 1000,
             hash: "0x0000000000000000000000000000000000000000000000000000000000000000".to_string(),
             parent_hash: "0x0000000000000000000000000000000000000000000000000000000000000001".to_string(),
-            timestamp: std::time::SystemTime::now()
-                .duration_since(std::time::UNIX_EPOCH)?
-                .as_secs(),
+            timestamp,
             transactions_root: "0x0000000000000000000000000000000000000000000000000000000000000002".to_string(),
             state_root: "0x0000000000000000000000000000000000000000000000000000000000000003".to_string(),
             difficulty: 1000000,
@@ -285,7 +293,7 @@ impl PsyClient {
     /// # TODO for Part 2:
     /// - Implement actual transaction lookup
     /// - Add caching for recent transactions
-    pub async fn get_transaction(&self, _tx_hash: &str) -> Result<Option<PsyTransaction>, Box<dyn std::error::Error>> {
+    pub async fn get_transaction(&self, _tx_hash: &str) -> CloakResult<Option<PsyTransaction>> {
         // TODO: Fetch transaction from Psy testnet
         Ok(None)
     }

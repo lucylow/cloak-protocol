@@ -3,10 +3,11 @@
 //! Implements the Cloak Protocol API server for frontend communication.
 //! Provides endpoints for proof submission, state queries, and health checks.
 
+use crate::error::{CloakError, CloakResult};
 use crate::node::CloakNode;
 use crate::api::{HealthCheckResponse, QueryStateRequest, QueryStateResponse, SubmitProofRequest, SubmitProofResponse};
 use std::sync::Arc;
-use tracing::{debug, info};
+use tracing::{debug, info, warn};
 
 /// The Cloak Protocol API Server
 #[derive(Clone)]
@@ -35,7 +36,7 @@ impl ApiServer {
     /// - Add service trait implementations
     /// - Add request validation and error handling
     /// - Add rate limiting and authentication
-    pub async fn start(&self) -> Result<(), Box<dyn std::error::Error>> {
+    pub async fn start(&self) -> CloakResult<()> {
         info!("Starting Cloak Protocol API server on {}", self.bind_addr);
 
         // TODO: Implement tonic gRPC server
@@ -57,7 +58,7 @@ impl ApiServer {
     /// Health check endpoint
     ///
     /// Returns the current status of the node and Psy connection
-    pub async fn health_check(&self) -> Result<HealthCheckResponse, Box<dyn std::error::Error>> {
+    pub async fn health_check(&self) -> CloakResult<HealthCheckResponse> {
         debug!("Health check requested");
 
         let node_status = self.node.get_status().await;
@@ -89,8 +90,13 @@ impl ApiServer {
     pub async fn submit_proof(
         &self,
         request: SubmitProofRequest,
-    ) -> Result<SubmitProofResponse, Box<dyn std::error::Error>> {
+    ) -> CloakResult<SubmitProofResponse> {
         debug!("Proof submission requested from user: {}", request.user_sdkey_hash);
+
+        // Validate proof data is not empty
+        if request.proof_data.is_empty() {
+            return Err(CloakError::InvalidInput("Proof data cannot be empty".to_string()));
+        }
 
         // TODO: Validate proof format
         // TODO: Verify user signature
@@ -121,31 +127,35 @@ impl ApiServer {
     pub async fn query_state(
         &self,
         request: QueryStateRequest,
-    ) -> Result<QueryStateResponse, Box<dyn std::error::Error>> {
+    ) -> CloakResult<QueryStateResponse> {
         debug!("State query requested for user: {}", request.user_sdkey_hash);
 
         // Parse SDKey hash from hex string
         let sdkey_hash_hex = request.user_sdkey_hash.trim_start_matches("0x");
-        let sdkey_hash_bytes = hex::decode(sdkey_hash_hex)?;
+        let sdkey_hash_bytes = hex::decode(sdkey_hash_hex)
+            .map_err(|e| CloakError::InvalidInput(format!("Invalid hex encoding: {}", e)))?;
+        
+        if sdkey_hash_bytes.len() != 32 {
+            return Err(CloakError::InvalidInput(
+                format!("SDKey hash must be 32 bytes, got {}", sdkey_hash_bytes.len())
+            ));
+        }
+        
         let mut sdkey_hash = [0u8; 32];
         sdkey_hash.copy_from_slice(&sdkey_hash_bytes);
 
         // Get user state from state manager
         let state_manager = self.node.state_manager.read().await;
-        match state_manager.get_user_state(sdkey_hash) {
-            Some(user_state) => {
-                Ok(QueryStateResponse {
-                    user_sdkey_hash: request.user_sdkey_hash,
-                    merkle_root: hex::encode(user_state.merkle_root),
-                    balances: user_state.balances,
-                    nonce: user_state.nonce,
-                    last_updated_block: user_state.last_updated_block,
-                })
-            }
-            None => {
-                Err("User not found".into())
-            }
-        }
+        let user_state = state_manager.get_user_state(sdkey_hash)
+            .ok_or_else(|| CloakError::user_not_found(&sdkey_hash))?;
+
+        Ok(QueryStateResponse {
+            user_sdkey_hash: request.user_sdkey_hash,
+            merkle_root: hex::encode(user_state.merkle_root),
+            balances: user_state.balances,
+            nonce: user_state.nonce,
+            last_updated_block: user_state.last_updated_block,
+        })
     }
 
     /// Broadcasts an encrypted order intent to the order relay network
@@ -158,7 +168,7 @@ impl ApiServer {
     pub async fn broadcast_order_intent(
         &self,
         _order: crate::api::OrderIntentMessage,
-    ) -> Result<String, Box<dyn std::error::Error>> {
+    ) -> CloakResult<String> {
         debug!("Order intent broadcast requested");
 
         // TODO: Validate order format
@@ -170,13 +180,13 @@ impl ApiServer {
     }
 
     /// Gets the current Merkle root
-    pub async fn get_merkle_root(&self) -> Result<String, Box<dyn std::error::Error>> {
+    pub async fn get_merkle_root(&self) -> CloakResult<String> {
         let state_manager = self.node.state_manager.read().await;
         Ok(hex::encode(state_manager.get_merkle_root()))
     }
 
     /// Gets the number of active users
-    pub async fn get_active_users(&self) -> Result<usize, Box<dyn std::error::Error>> {
+    pub async fn get_active_users(&self) -> CloakResult<usize> {
         let state_manager = self.node.state_manager.read().await;
         Ok(state_manager.get_user_count())
     }

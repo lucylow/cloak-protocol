@@ -1,11 +1,11 @@
 // Cloak Protocol Bridge Server - Standalone REST API
 // This binary runs the HTTP/WebSocket bridge without the full node
 
-use cloak_backend::api::bridge;
+use cloak_backend::{api::bridge, CloakError};
 use tracing::info;
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
+async fn main() -> Result<(), CloakError> {
     // Initialize logging
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())

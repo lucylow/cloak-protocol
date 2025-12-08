@@ -61,31 +61,31 @@ export class ErrorBoundary extends Component<Props, State> {
       }
 
       return (
-        <div className="min-h-screen bg-black flex items-center justify-center p-4">
-          <div className="max-w-2xl w-full bg-zinc-900 border border-zinc-800 rounded-lg p-8">
+        <div className="min-h-screen bg-background flex items-center justify-center p-4">
+          <div className="max-w-2xl w-full bg-card border border-border rounded-xl p-8">
             <div className="flex items-center gap-4 mb-6">
-              <div className="p-3 bg-red-500/10 rounded-lg">
-                <AlertTriangle className="w-8 h-8 text-red-500" />
+              <div className="p-3 bg-destructive/10 rounded-lg">
+                <AlertTriangle className="w-8 h-8 text-destructive" aria-hidden="true" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-white">Something went wrong</h1>
-                <p className="text-zinc-400 mt-1">
+                <h1 className="text-2xl font-bold text-foreground">Something went wrong</h1>
+                <p className="text-muted-foreground mt-1">
                   An unexpected error occurred in the application
                 </p>
               </div>
             </div>
 
             {this.state.error && (
-              <div className="bg-zinc-950 border border-zinc-800 rounded-lg p-4 mb-6">
-                <p className="text-sm font-mono text-red-400 mb-2">
+              <div className="bg-muted/50 border border-border rounded-lg p-4 mb-6">
+                <p className="text-sm font-mono text-destructive mb-2">
                   {this.state.error.toString()}
                 </p>
                 {this.state.errorInfo && (
                   <details className="mt-4">
-                    <summary className="text-sm text-zinc-400 cursor-pointer hover:text-zinc-300">
+                    <summary className="text-sm text-muted-foreground cursor-pointer hover:text-foreground">
                       Stack trace
                     </summary>
-                    <pre className="mt-2 text-xs text-zinc-500 overflow-auto max-h-64">
+                    <pre className="mt-2 text-xs text-muted-foreground overflow-auto max-h-64 font-mono">
                       {this.state.errorInfo.componentStack}
                     </pre>
                   </details>
@@ -96,27 +96,29 @@ export class ErrorBoundary extends Component<Props, State> {
             <div className="flex gap-4">
               <button
                 onClick={this.handleReset}
-                className="flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
+                className="flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                aria-label="Try again"
               >
-                <RefreshCw className="w-4 h-4" />
+                <RefreshCw className="w-4 h-4" aria-hidden="true" />
                 Try Again
               </button>
               <button
                 onClick={() => window.location.href = '/'}
-                className="px-6 py-3 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg transition-colors"
+                className="px-6 py-3 bg-secondary hover:bg-secondary/80 text-secondary-foreground rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                aria-label="Go to home page"
               >
                 Go Home
               </button>
             </div>
 
-            <div className="mt-6 pt-6 border-t border-zinc-800">
-              <p className="text-sm text-zinc-500">
+            <div className="mt-6 pt-6 border-t border-border">
+              <p className="text-sm text-muted-foreground">
                 If this problem persists, please contact support or check the{' '}
                 <a
                   href="https://github.com/lucylow/cloak-protocol"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-purple-400 hover:text-purple-300 underline"
+                  className="text-primary hover:text-primary/80 underline"
                 >
                   GitHub repository
                 </a>
@@ -135,16 +137,17 @@ export class ErrorBoundary extends Component<Props, State> {
 // Functional error fallback component
 export function ErrorFallback({ error, resetError }: { error: Error; resetError: () => void }) {
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center p-4">
-      <div className="max-w-lg w-full bg-zinc-900 border border-zinc-800 rounded-lg p-6">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div className="max-w-lg w-full bg-card border border-border rounded-xl p-6">
         <div className="flex items-center gap-3 mb-4">
-          <AlertTriangle className="w-6 h-6 text-red-500" />
-          <h2 className="text-xl font-bold text-white">Error</h2>
+          <AlertTriangle className="w-6 h-6 text-destructive" aria-hidden="true" />
+          <h2 className="text-xl font-bold text-foreground">Error</h2>
         </div>
-        <p className="text-zinc-400 mb-4">{error.message}</p>
+        <p className="text-muted-foreground mb-4">{error.message}</p>
         <button
           onClick={resetError}
-          className="w-full px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
+          className="w-full px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          aria-label="Try again"
         >
           Try Again
         </button>

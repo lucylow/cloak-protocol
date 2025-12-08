@@ -1,6 +1,7 @@
 // REST API Bridge for Frontend Integration
 // Wraps gRPC services with HTTP/JSON endpoints for Next.js compatibility
 
+use crate::error::CloakError;
 use axum::{
     extract::{Json, State, WebSocketUpgrade},
     http::{header, Method, StatusCode},
@@ -166,6 +167,11 @@ async fn submit_proof_handler(
     State(state): State<AppState>,
     Json(req): Json<SubmitProofRequest>,
 ) -> Result<Json<SubmitProofResponse>, StatusCode> {
+    // Validate proof data is not empty
+    if req.proof_data.is_empty() {
+        return Err(StatusCode::BAD_REQUEST);
+    }
+    
     // TODO: Validate signature
     // TODO: Verify proof using ZK verifier
     // TODO: Submit to Psy testnet
@@ -245,20 +251,36 @@ async fn handle_socket(
     let mut interval = interval(Duration::from_secs(2));
     
     loop {
-        interval.tick().await;
-        
-        // Send real-time updates
-        let proofs = state.proofs.read().await.clone();
-        let orders = state.orders.read().await.clone();
-        
-        let update = serde_json::json!({
-            "type": "update",
-            "proofs": proofs,
-            "orders": orders,
-        });
-        
-        if socket.send(Message::Text(update.to_string())).await.is_err() {
-            break;
+        tokio::select! {
+            _ = interval.tick() => {
+                // Send real-time updates - clone only when sending
+                let proofs: Vec<ZKProof> = {
+                    let guard = state.proofs.read().await;
+                    guard.clone()
+                };
+                let orders: Vec<Order> = {
+                    let guard = state.orders.read().await;
+                    guard.clone()
+                };
+                
+                let update = serde_json::json!({
+                    "type": "update",
+                    "proofs": proofs,
+                    "orders": orders,
+                });
+                
+                if socket.send(Message::Text(update.to_string())).await.is_err() {
+                    break;
+                }
+            }
+            result = socket.recv() => {
+                // Handle incoming messages or connection close
+                match result {
+                    Some(Ok(Message::Close(_))) => break,
+                    Some(Err(_)) => break,
+                    _ => {}
+                }
+            }
         }
     }
 }
@@ -288,7 +310,7 @@ pub fn create_router() -> Router {
         .with_state(state)
 }
 
-pub async fn run_server(port: u16) -> Result<(), Box<dyn std::error::Error>> {
+pub async fn run_server(port: u16) -> Result<(), CloakError> {
     let app = create_router();
     let addr = format!("0.0.0.0:{}", port);
     

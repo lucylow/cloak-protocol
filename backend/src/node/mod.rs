@@ -3,6 +3,7 @@
 //! Defines the `CloakNode` struct and event loop for managing the Cloak Protocol backend.
 //! The node coordinates between state management, proof generation, order relay, and Psy integration.
 
+use crate::error::{CloakError, CloakResult};
 use crate::psy_client::PsyClient;
 use crate::state::StateManager;
 use std::sync::Arc;
@@ -54,7 +55,7 @@ impl CloakNode {
     ///
     /// # Returns
     /// A new CloakNode instance or an error if initialization fails
-    pub async fn new(psy_rpc_url: &str, db_path: &str) -> Result<Self, Box<dyn std::error::Error>> {
+    pub async fn new(psy_rpc_url: &str, db_path: &str) -> CloakResult<Self> {
         info!("Initializing Cloak Protocol node with Psy testnet: {}", psy_rpc_url);
 
         // Initialize Psy client with WebSocket connection
@@ -92,7 +93,7 @@ impl CloakNode {
     /// - Add order matching and aggregation
     /// - Implement batch proof generation
     /// - Add error recovery and retry logic
-    pub async fn start_event_loop(&self) -> Result<(), Box<dyn std::error::Error>> {
+    pub async fn start_event_loop(&self) -> CloakResult<()> {
         info!("Starting Cloak node event loop");
 
         loop {
@@ -112,7 +113,7 @@ impl CloakNode {
 
     /// Processes a new block from the Psy chain
     /// TODO: Implement full block processing logic
-    async fn process_block(&self, _block_number: u64) -> Result<(), Box<dyn std::error::Error>> {
+    async fn process_block(&self, _block_number: u64) -> CloakResult<()> {
         // TODO: Extract state transitions from block
         // TODO: Validate transitions against ZK proofs
         // TODO: Update local state
@@ -122,7 +123,7 @@ impl CloakNode {
 
     /// Submits a private trade proof to the Psy verifier contract
     /// TODO: Implement full proof submission with gas estimation
-    pub async fn submit_trade_proof(&self, _proof_data: Vec<u8>) -> Result<String, Box<dyn std::error::Error>> {
+    pub async fn submit_trade_proof(&self, _proof_data: Vec<u8>) -> CloakResult<String> {
         // TODO: Serialize proof to Psy contract format
         // TODO: Estimate gas costs
         // TODO: Submit transaction

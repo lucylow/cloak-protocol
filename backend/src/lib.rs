@@ -8,10 +8,13 @@
 //! - gRPC API server for frontend communication
 
 pub mod api;
+pub mod error;
 pub mod node;
 pub mod psy_client;
 pub mod state;
 pub mod deploy;
+
+pub use error::{CloakError, CloakResult};
 
 pub use api::server::ApiServer;
 pub use node::CloakNode;

@@ -1,6 +1,7 @@
 // Psy Testnet Deployment Module
 // Handles smart contract deployment and testnet initialization
 
+use crate::error::{CloakError, CloakResult};
 use ethers::{
     prelude::*,
     providers::{Http, Provider},
@@ -38,7 +39,7 @@ pub struct PsyDeployer {
 }
 
 impl PsyDeployer {
-    pub async fn new(config: DeploymentConfig) -> Result<Self, Box<dyn std::error::Error>> {
+    pub async fn new(config: DeploymentConfig) -> CloakResult<Self> {
         let provider = Provider::<Http>::try_from(&config.rpc_url)?;
         let provider = Arc::new(provider);
         
@@ -53,7 +54,7 @@ impl PsyDeployer {
     }
     
     /// Deploy the ZK verifier smart contract to Psy testnet
-    pub async fn deploy_verifier(&self) -> Result<String, Box<dyn std::error::Error>> {
+    pub async fn deploy_verifier(&self) -> CloakResult<String> {
         tracing::info!("Deploying ZK verifier contract to Psy testnet...");
         
         // TODO: Replace with actual contract bytecode and ABI
@@ -66,7 +67,7 @@ impl PsyDeployer {
     }
     
     /// Initialize the global state root on-chain
-    pub async fn initialize_state_root(&self, verifier_address: &str, initial_root: &str) -> Result<String, Box<dyn std::error::Error>> {
+    pub async fn initialize_state_root(&self, verifier_address: &str, initial_root: &str) -> CloakResult<String> {
         tracing::info!("Initializing state root on Psy testnet...");
         
         // TODO: Call contract method to set initial root
@@ -78,7 +79,7 @@ impl PsyDeployer {
     }
     
     /// Fund testnet gas wallets from faucet
-    pub async fn fund_from_faucet(&self, address: &str) -> Result<(), Box<dyn std::error::Error>> {
+    pub async fn fund_from_faucet(&self, address: &str) -> CloakResult<()> {
         tracing::info!("Requesting testnet funds for address: {}", address);
         
         // TODO: Call Psy testnet faucet API
@@ -89,8 +90,9 @@ impl PsyDeployer {
     }
     
     /// Check Psy testnet sync status
-    pub async fn check_sync_status(&self) -> Result<SyncStatus, Box<dyn std::error::Error>> {
-        let block_number = self.provider.get_block_number().await?;
+    pub async fn check_sync_status(&self) -> CloakResult<SyncStatus> {
+        let block_number = self.provider.get_block_number().await
+            .map_err(|e| CloakError::Network(format!("Failed to get block number: {}", e)))?;
         
         Ok(SyncStatus {
             synced: true,
@@ -100,7 +102,7 @@ impl PsyDeployer {
     }
     
     /// Deploy contract factory for multi-asset RWA support
-    pub async fn deploy_rwa_factory(&self) -> Result<String, Box<dyn std::error::Error>> {
+    pub async fn deploy_rwa_factory(&self) -> CloakResult<String> {
         tracing::info!("Deploying RWA token factory...");
         
         // TODO: Deploy factory contract
@@ -120,7 +122,7 @@ pub struct SyncStatus {
 }
 
 /// Full deployment workflow
-pub async fn deploy_full_stack() -> Result<DeploymentInfo, Box<dyn std::error::Error>> {
+pub async fn deploy_full_stack() -> CloakResult<DeploymentInfo> {
     let config = DeploymentConfig::default();
     let deployer = PsyDeployer::new(config).await?;
     

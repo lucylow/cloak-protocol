@@ -29,19 +29,31 @@ export class CloakApiClient {
   private wsConnection: WebSocket | null = null;
   private wsReconnectAttempts = 0;
   private maxWsReconnectAttempts = 5;
+  private activeRequests = new Map<string, AbortController>();
 
   constructor(config: Partial<ApiConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
   }
 
-  // Generic HTTP request with retry logic
+  // Generic HTTP request with retry logic and cancellation support
   private async request<T>(
     endpoint: string,
     options: RequestInit = {},
-    retryCount = 0
+    retryCount = 0,
+    requestId?: string
   ): Promise<ApiResponse<T>> {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), this.config.timeout);
+    
+    // Store request for potential cancellation
+    if (requestId) {
+      // Cancel previous request with same ID
+      const previousRequest = this.activeRequests.get(requestId);
+      if (previousRequest) {
+        previousRequest.abort();
+      }
+      this.activeRequests.set(requestId, controller);
+    }
 
     try {
       const response = await fetch(`${this.config.baseUrl}${endpoint}`, {
@@ -54,9 +66,21 @@ export class CloakApiClient {
       });
 
       clearTimeout(timeoutId);
+      if (requestId) {
+        this.activeRequests.delete(requestId);
+      }
 
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        // Handle HTTP error responses
+        let errorData: any = null;
+        try {
+          errorData = await response.json();
+        } catch {
+          // Ignore JSON parse errors
+        }
+        
+        const errorMessage = errorData?.error || errorData?.message || `HTTP ${response.status}: ${response.statusText}`;
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();
@@ -66,11 +90,23 @@ export class CloakApiClient {
       };
     } catch (error) {
       clearTimeout(timeoutId);
+      if (requestId) {
+        this.activeRequests.delete(requestId);
+      }
+
+      // Don't retry if request was aborted
+      if (error instanceof Error && error.name === 'AbortError' && retryCount === 0) {
+        return {
+          success: false,
+          error: 'Request was cancelled',
+          code: 'CANCELLED'
+        };
+      }
 
       // Retry logic
       if (retryCount < this.config.retries) {
         await this.delay(this.config.retryDelay * (retryCount + 1));
-        return this.request<T>(endpoint, options, retryCount + 1);
+        return this.request<T>(endpoint, options, retryCount + 1, requestId);
       }
 
       // Handle specific error types
@@ -98,23 +134,43 @@ export class CloakApiClient {
     }
   }
 
+  // Cancel a specific request by ID
+  cancelRequest(requestId: string): void {
+    const controller = this.activeRequests.get(requestId);
+    if (controller) {
+      controller.abort();
+      this.activeRequests.delete(requestId);
+    }
+  }
+
+  // Cancel all active requests
+  cancelAllRequests(): void {
+    this.activeRequests.forEach((controller) => {
+      controller.abort();
+    });
+    this.activeRequests.clear();
+  }
+
   // Health check
-  async healthCheck(): Promise<ApiResponse<{
+  async healthCheck(requestId?: string): Promise<ApiResponse<{
     status: string;
     psy_sync_status: string;
     block_height: number;
     connected_peers: number;
   }>> {
-    return this.request('/health');
+    return this.request('/health', {}, 0, requestId);
   }
 
   // Submit ZK proof
-  async submitProof(data: {
-    user_sdkey: string;
-    proof_data: string;
-    public_inputs: string[];
-    signature: string;
-  }): Promise<ApiResponse<{
+  async submitProof(
+    data: {
+      user_sdkey: string;
+      proof_data: string;
+      public_inputs: string[];
+      signature: string;
+    },
+    requestId?: string
+  ): Promise<ApiResponse<{
     proof_id: string;
     status: string;
     tx_hash?: string;
@@ -122,11 +178,14 @@ export class CloakApiClient {
     return this.request('/api/proof/submit', {
       method: 'POST',
       body: JSON.stringify(data)
-    });
+    }, 0, requestId);
   }
 
   // Query user state
-  async queryState(userSdkey: string): Promise<ApiResponse<{
+  async queryState(
+    userSdkey: string,
+    requestId?: string
+  ): Promise<ApiResponse<{
     balances: Array<{ token: string; amount: number; privacy_status: string }>;
     positions: any[];
     orders: any[];
@@ -134,22 +193,22 @@ export class CloakApiClient {
     return this.request('/api/state/query', {
       method: 'POST',
       body: JSON.stringify({ user_sdkey: userSdkey })
-    });
+    }, 0, requestId);
   }
 
   // Get orders
-  async getOrders(): Promise<ApiResponse<any[]>> {
-    return this.request('/api/orders');
+  async getOrders(requestId?: string): Promise<ApiResponse<any[]>> {
+    return this.request('/api/orders', {}, 0, requestId);
   }
 
   // Get positions
-  async getPositions(): Promise<ApiResponse<any[]>> {
-    return this.request('/api/positions');
+  async getPositions(requestId?: string): Promise<ApiResponse<any[]>> {
+    return this.request('/api/positions', {}, 0, requestId);
   }
 
   // Get proofs
-  async getProofs(): Promise<ApiResponse<any[]>> {
-    return this.request('/api/proofs');
+  async getProofs(requestId?: string): Promise<ApiResponse<any[]>> {
+    return this.request('/api/proofs', {}, 0, requestId);
   }
 
   // WebSocket connection for real-time updates
