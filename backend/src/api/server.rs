@@ -88,16 +88,15 @@ impl ApiServer {
 
         let node_status = self.node.get_status().await;
         
-        // Try to get actual block height from Psy client, fallback to 0 if unavailable
-        let block_height = self.node.psy_client.get_last_block_height().await;
-        let block_height = if block_height == 0 {
-            // If not set, try to get from chain state
-            self.node.psy_client.get_chain_state().await
-                .map(|header| header.height)
-                .unwrap_or(0)
-        } else {
-            block_height
-        };
+        // Try to get actual block height from Psy client, fallback to chain state if unavailable
+        let mut block_height = self.node.psy_client.get_last_block_height().await;
+        if block_height == 0 {
+            // If not set, try to get from chain state and update the cached value
+            if let Ok(header) = self.node.psy_client.get_chain_state().await {
+                block_height = header.height;
+                self.node.psy_client.update_last_block_height(header.height).await;
+            }
+        }
 
         Ok(HealthCheckResponse {
             status: if node_status.is_running { "healthy" } else { "unhealthy" }.to_string(),

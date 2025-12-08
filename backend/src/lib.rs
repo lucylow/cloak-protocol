@@ -66,6 +66,7 @@ mod tests {
     fn test_default_config() {
         let config = CloakConfig::default();
         assert_eq!(config.api_bind_addr, "127.0.0.1:50051");
+        assert_eq!(config.rest_api_port, 8080);
         assert_eq!(config.db_path, "./cloak_state.db");
     }
 }

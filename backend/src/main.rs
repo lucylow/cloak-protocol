@@ -21,6 +21,7 @@ async fn main() -> Result<(), CloakError> {
     info!("Configuration loaded:");
     info!("  Psy RPC URL: {}", config.psy_rpc_url);
     info!("  API Bind Address: {}", config.api_bind_addr);
+    info!("  REST API Port: {}", config.rest_api_port);
     info!("  Database Path: {}", config.db_path);
 
     // Initialize the Cloak node
