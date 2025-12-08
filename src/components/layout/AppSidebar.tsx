@@ -9,7 +9,9 @@ import {
   FileText,
   ChevronLeft,
   ChevronRight,
-  Vote
+  Vote,
+  ArrowLeftRight,
+  Building2
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { cn } from '@/lib/utils';
@@ -34,6 +36,8 @@ const mainNavItems = [
   { href: '/app/portfolio', label: 'Portfolio', icon: BarChart3 },
   { href: '/app/privacy', label: 'Privacy Proofs', icon: Shield },
   { href: '/app/governance', label: 'Governance', icon: Vote },
+  { href: '/app/demo/dex', label: 'DEX Demo', icon: ArrowLeftRight },
+  { href: '/app/demo/rwa', label: 'RWA Market', icon: Building2 },
 ];
 
 const secondaryNavItems = [

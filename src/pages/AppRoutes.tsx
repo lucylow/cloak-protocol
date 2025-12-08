@@ -9,6 +9,8 @@ import WalletPage from './app/Wallet';
 import DocsPage from './app/Docs';
 import SettingsPage from './app/Settings';
 import GovernancePage from './app/Governance';
+import DexDemo from './app/DexDemo';
+import RwaMarket from './app/RwaMarket';
 import type { PsySDKey } from '@/types/zk';
 
 const AppRoutes = () => {
@@ -25,6 +27,8 @@ const AppRoutes = () => {
         <Route path="/docs" element={<DocsPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/governance" element={<GovernancePage />} />
+        <Route path="/demo/dex" element={<DexDemo />} />
+        <Route path="/demo/rwa" element={<RwaMarket />} />
       </Routes>
     </AppLayout>
   );

@@ -349,9 +349,179 @@ export async function getTransactions(): Promise<Transaction[]> {
   return stored.map(t => ({ ...t, timestamp: new Date(t.timestamp) }));
 }
 
+// ========== DEX DEMO API ==========
+
+export type DexPair = 'CLOAK/rUSD' | 'CLOAK/USDC' | 'CLOAK/ETH' | 'RWA-CREDIT/USDC';
+export const DEX_PAIRS: DexPair[] = ['CLOAK/rUSD', 'CLOAK/USDC', 'CLOAK/ETH', 'RWA-CREDIT/USDC'];
+
+export type QuoteResult = {
+  pair: DexPair;
+  amountIn: number;
+  amountOut: number;
+  price: number;
+  priceImpact: number;
+  liquidity: number;
+  fee: number;
+  timestamp: number;
+};
+
+const DEX_BASE_PRICES: Record<DexPair, number> = {
+  'CLOAK/rUSD': 0.095,
+  'CLOAK/USDC': 0.095,
+  'CLOAK/ETH': 0.000032,
+  'RWA-CREDIT/USDC': 0.95,
+};
+
+const DEX_LIQUIDITY: Record<DexPair, number> = {
+  'CLOAK/rUSD': 50000,
+  'CLOAK/USDC': 35000,
+  'CLOAK/ETH': 120,
+  'RWA-CREDIT/USDC': 25000,
+};
+
+export async function getQuote(pair: DexPair, amountIn: number): Promise<QuoteResult> {
+  await randomLatency();
+  maybeFailure();
+  
+  const basePrice = DEX_BASE_PRICES[pair];
+  const liquidity = DEX_LIQUIDITY[pair];
+  const impact = Math.min(0.5, (amountIn / Math.max(1, liquidity)) * 0.1);
+  const effectivePrice = basePrice * (1 - impact);
+  const amountOut = amountIn * effectivePrice;
+  const fee = Math.max(0.0001, amountOut * 0.003);
+
+  return {
+    pair,
+    amountIn,
+    amountOut: Number(amountOut.toFixed(6)),
+    price: Number(effectivePrice.toFixed(8)),
+    priceImpact: Number(impact.toFixed(4)),
+    liquidity,
+    fee: Number(fee.toFixed(6)),
+    timestamp: Date.now(),
+  };
+}
+
+export async function submitDexSwap(payload: {
+  pair: DexPair;
+  amountIn: number;
+  slippagePct: number;
+}): Promise<{ ok: boolean; txId?: string; error?: string }> {
+  await delay(800);
+  
+  if (Math.random() < 0.08) {
+    return { ok: false, error: 'Simulated network failure. Try again.' };
+  }
+
+  const txId = `tx_${Date.now().toString(36)}_${Math.floor(Math.random() * 9000 + 1000)}`;
+  
+  const swaps = JSON.parse(localStorage.getItem('cloak_dex_swaps') || '[]');
+  swaps.unshift({ id: txId, payload, ts: Date.now() });
+  localStorage.setItem('cloak_dex_swaps', JSON.stringify(swaps.slice(0, 100)));
+
+  return { ok: true, txId };
+}
+
+export function getStoredDexSwaps(): any[] {
+  return JSON.parse(localStorage.getItem('cloak_dex_swaps') || '[]');
+}
+
+// ========== RWA MARKET API ==========
+
+export type RwaMarketAsset = {
+  id: string;
+  name: string;
+  category: 'bonds' | 'realestate' | 'invoice' | 'green';
+  yieldPct: number;
+  maturityDate: string;
+  size: number;
+  price: number;
+  status: 'open' | 'closed';
+  description: string;
+};
+
+const RWA_MARKET_ASSETS: RwaMarketAsset[] = [
+  {
+    id: 'rwa-green-1',
+    name: 'Green Bond Series A',
+    category: 'green',
+    yieldPct: 6.2,
+    maturityDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+    size: 100000,
+    price: 1.0,
+    status: 'open',
+    description: 'Tokenized green infrastructure bond. Principal backed and interest paid quarterly.',
+  },
+  {
+    id: 'rwa-estate-1',
+    name: 'Commercial Real Estate 2026',
+    category: 'realestate',
+    yieldPct: 7.8,
+    maturityDate: new Date(Date.now() + 2 * 365 * 24 * 60 * 60 * 1000).toISOString(),
+    size: 250000,
+    price: 1.0,
+    status: 'open',
+    description: 'Secured loan on commercial property portfolio across major metro areas.',
+  },
+  {
+    id: 'rwa-invoice-1',
+    name: 'Invoice Finance Pool',
+    category: 'invoice',
+    yieldPct: 5.0,
+    maturityDate: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString(),
+    size: 75000,
+    price: 1.0,
+    status: 'closed',
+    description: 'Short-term invoice financing pool. Currently closed for new investment.',
+  },
+  {
+    id: 'rwa-bonds-1',
+    name: 'Treasury Bond Index',
+    category: 'bonds',
+    yieldPct: 4.5,
+    maturityDate: new Date(Date.now() + 3 * 365 * 24 * 60 * 60 * 1000).toISOString(),
+    size: 500000,
+    price: 1.001,
+    status: 'open',
+    description: 'Diversified treasury bond index with quarterly distributions.',
+  },
+];
+
+export async function getRwaMarketAssets(): Promise<RwaMarketAsset[]> {
+  await randomLatency();
+  maybeFailure();
+  return RWA_MARKET_ASSETS.map((a) => ({ ...a }));
+}
+
+export async function submitRwaOrder(payload: {
+  assetId: string;
+  side: 'buy' | 'sell';
+  qty: number;
+}): Promise<{ ok: boolean; orderId?: string; error?: string }> {
+  await delay(700);
+  
+  if (Math.random() < 0.06) {
+    return { ok: false, error: 'Order failed due to simulated settlement issue.' };
+  }
+
+  const orderId = `rwa_${Date.now().toString(36)}_${Math.floor(Math.random() * 9000 + 1000)}`;
+  
+  const orders = JSON.parse(localStorage.getItem('cloak_rwa_orders') || '[]');
+  orders.unshift({ id: orderId, payload, ts: Date.now() });
+  localStorage.setItem('cloak_rwa_orders', JSON.stringify(orders.slice(0, 200)));
+
+  return { ok: true, orderId };
+}
+
+export function getStoredRwaOrders(): any[] {
+  return JSON.parse(localStorage.getItem('cloak_rwa_orders') || '[]');
+}
+
 // Reset all demo data
 export function resetDemoData(): void {
   Object.values(STORAGE_KEYS).forEach(key => {
     localStorage.removeItem(key);
   });
+  localStorage.removeItem('cloak_dex_swaps');
+  localStorage.removeItem('cloak_rwa_orders');
 }
