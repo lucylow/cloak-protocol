@@ -8,7 +8,8 @@ import {
   Settings,
   FileText,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Vote
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { cn } from '@/lib/utils';
@@ -32,6 +33,7 @@ const mainNavItems = [
   { href: '/app/trade', label: 'Trade', icon: Zap },
   { href: '/app/portfolio', label: 'Portfolio', icon: BarChart3 },
   { href: '/app/privacy', label: 'Privacy Proofs', icon: Shield },
+  { href: '/app/governance', label: 'Governance', icon: Vote },
 ];
 
 const secondaryNavItems = [

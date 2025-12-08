@@ -8,6 +8,7 @@ import PrivacyPage from './app/Privacy';
 import WalletPage from './app/Wallet';
 import DocsPage from './app/Docs';
 import SettingsPage from './app/Settings';
+import GovernancePage from './app/Governance';
 import type { PsySDKey } from '@/types/zk';
 
 const AppRoutes = () => {
@@ -23,6 +24,7 @@ const AppRoutes = () => {
         <Route path="/wallet" element={<WalletPage />} />
         <Route path="/docs" element={<DocsPage />} />
         <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/governance" element={<GovernancePage />} />
       </Routes>
     </AppLayout>
   );
