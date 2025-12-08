@@ -11,7 +11,12 @@ import {
   ChevronRight,
   Vote,
   ArrowLeftRight,
-  Building2
+  Building2,
+  TrendingUp,
+  Activity,
+  HelpCircle,
+  Lock,
+  Coins
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { cn } from '@/lib/utils';
@@ -34,7 +39,11 @@ const mainNavItems = [
   { href: '/app', label: 'Dashboard', icon: Home },
   { href: '/app/trade', label: 'Trade', icon: Zap },
   { href: '/app/portfolio', label: 'Portfolio', icon: BarChart3 },
+  { href: '/app/analytics', label: 'Analytics', icon: TrendingUp },
+  { href: '/app/activity', label: 'Activity', icon: Activity },
   { href: '/app/privacy', label: 'Privacy Proofs', icon: Shield },
+  { href: '/app/staking', label: 'Staking', icon: Coins },
+  { href: '/app/bridge', label: 'Bridge', icon: ArrowLeftRight },
   { href: '/app/governance', label: 'Governance', icon: Vote },
   { href: '/app/demo/dex', label: 'DEX Demo', icon: ArrowLeftRight },
   { href: '/app/demo/rwa', label: 'RWA Market', icon: Building2 },
@@ -42,6 +51,8 @@ const mainNavItems = [
 
 const secondaryNavItems = [
   { href: '/app/wallet', label: 'Wallet', icon: Wallet },
+  { href: '/app/security', label: 'Security', icon: Lock },
+  { href: '/app/help', label: 'Help & Support', icon: HelpCircle },
   { href: '/app/docs', label: 'Documentation', icon: FileText },
   { href: '/app/settings', label: 'Settings', icon: Settings },
 ];

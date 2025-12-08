@@ -137,135 +137,117 @@ Traditional transparent blockchains expose critical financial information—posi
 
 ---
 
-## Technical Architecture
+## 🏗️ Technical Architecture
 
 ### System Architecture
 
-```mermaid
-graph TB
-    subgraph "Client Layer"
-        FE[React Frontend<br/>Vite + TypeScript]
-        SDK[ZK SDK<br/>Wasm + CUDA]
-        WALLET[Wallet Integration<br/>SDKey Management]
-    end
+![System Architecture](images/system-architecture.jpg)
 
-    subgraph "API Gateway Layer"
-        REST[REST API<br/>Axum HTTP Server]
-        WS[WebSocket Server<br/>Real-time Updates]
-        GRPC[gRPC Server<br/>Tonic]
-    end
+The Cloak Protocol architecture consists of four main layers:
 
-    subgraph "Backend Core"
-        NODE[CloakNode<br/>Orchestrator]
-        STATE[StateManager<br/>RocksDB + Merkle Tree]
-        PROVER[ZK Prover<br/>Arkworks Circuits]
-        RELAY[Order Relay<br/>libp2p Gossipsub]
-    end
-
-    subgraph "Psy Protocol Layer"
-        PSY_CLIENT[Psy Client<br/>RPC Integration]
-        VERIFIER[Verifier Contract<br/>On-chain Proof Validation]
-        PARTH[PARTH Lanes<br/>1024 Parallel Execution]
-    end
-
-    FE --> REST
-    FE --> WS
-    SDK --> PROVER
-    WALLET --> FE
-    
-    REST --> NODE
-    WS --> NODE
-    GRPC --> NODE
-    
-    NODE --> STATE
-    NODE --> PROVER
-    NODE --> RELAY
-    NODE --> PSY_CLIENT
-    
-    PSY_CLIENT --> VERIFIER
-    VERIFIER --> PARTH
-```
+- **Client Layer**: React frontend with ZK SDK and wallet integration
+- **API Gateway Layer**: REST API, WebSocket, and gRPC servers for real-time communication
+- **Backend Core**: CloakNode orchestrator, StateManager with Merkle trees, ZK Prover, and order relay
+- **Psy Protocol Layer**: Integration with Psy Protocol's PARTH lanes and verifier contracts
 
 ### Data Flow: Trade Execution
 
-```mermaid
-sequenceDiagram
-    participant User as User (Frontend)
-    participant API as API Gateway
-    participant Node as CloakNode
-    participant Prover as ZK Prover
-    participant State as StateManager
-    participant Psy as Psy Protocol
+![Data Flow: Trade Execution](images/data-flow-trade.jpg)
 
-    User->>API: POST /api/prove_trade<br/>{order, sdkey_hash, signature}
-    API->>Node: Validate & Process Order
-    Node->>State: Query User Balance
-    State-->>Node: Balance + Merkle Proof
-    Node->>Prover: Generate ZK Proof
-    Prover->>Prover: Compute Circuit<br/>(180ms, 1.2M constraints)
-    Prover-->>Node: Proof + State Roots
-    Node->>Node: Batch Proofs (64/batch)
-    Node->>Psy: Submit Batch Proof
-    Psy->>Psy: Verify Proof (50ms)
-    Psy-->>Node: Transaction Hash
-    Node-->>API: Settlement Confirmed
-    API-->>User: {tx_hash, status: "settled"}
-```
+The trade execution flow follows these steps:
+
+1. User submits trade order via frontend
+2. API Gateway validates and processes the order
+3. CloakNode queries user balance from StateManager
+4. ZK Prover generates zero-knowledge proof (~180ms)
+5. Proof is batched and submitted to Psy Protocol
+6. On-chain verification completes (~50ms)
+7. Settlement confirmation returned to user
+
+**Total end-to-end latency: ~240ms**
 
 ### Component Interaction
 
-```mermaid
-graph LR
-    subgraph "State Management"
-        SM[StateManager]
-        MT[Merkle Tree<br/>Poseidon-2]
-        DB[(RocksDB<br/>Persistence)]
-    end
+![Component Interaction](images/component-interaction.jpg)
 
-    subgraph "ZK Proving"
-        CIRCUIT[Balance Circuit<br/>1.2M constraints]
-        WITNESS[Witness Generation]
-        PROOF[Groth16 Proof]
-    end
+Key component interactions:
 
-    subgraph "Order Processing"
-        INTENT[Order Intent]
-        MATCH[Order Matching]
-        BATCH[Batch Aggregation]
-    end
-
-    SM --> MT
-    SM --> DB
-    CIRCUIT --> WITNESS
-    WITNESS --> PROOF
-    INTENT --> MATCH
-    MATCH --> BATCH
-    BATCH --> CIRCUIT
-    PROOF --> SM
-```
+- **State Management**: Maintains user balances in Merkle trees with RocksDB persistence
+- **ZK Proving**: Generates Groth16 proofs using balance circuits (1.2M constraints)
+- **Order Processing**: Handles order intents, matching, and batch aggregation
 
 ### Zero-Knowledge Proof Flow
 
-```mermaid
-flowchart TD
-    START[User Initiates Trade] --> VALIDATE{Validate Order}
-    VALIDATE -->|Invalid| ERROR[Return Error]
-    VALIDATE -->|Valid| QUERY[Query Private State]
-    QUERY --> MERKLE[Generate Merkle Proof]
-    MERKLE --> WITNESS[Construct Witness]
-    WITNESS --> CIRCUIT[Run ZK Circuit]
-    CIRCUIT --> PROVE[Generate Groth16 Proof]
-    PROVE --> VERIFY{Verify Proof}
-    VERIFY -->|Invalid| ERROR
-    VERIFY -->|Valid| BATCH[Add to Batch Queue]
-    BATCH --> AGGREGATE{64 Proofs Ready?}
-    AGGREGATE -->|No| WAIT[Wait for More]
-    AGGREGATE -->|Yes| SUBMIT[Submit to Psy]
-    WAIT --> BATCH
-    SUBMIT --> SETTLE[Settlement on Psy]
-    SETTLE --> CONFIRM[Confirmation Event]
-    CONFIRM --> END[Trade Complete]
-```
+![Zero-Knowledge Proof Flow](images/zk-proof-flow.jpg)
+
+The ZK proof generation and verification process:
+
+1. User initiates trade → Order validation
+2. Query private state → Generate Merkle proof
+3. Construct witness → Run ZK circuit
+4. Generate Groth16 proof → Verify proof
+5. Add to batch queue → Submit to Psy when batch is ready (64 proofs)
+6. Settlement on Psy → Trade complete
+
+### Network Topology
+
+![Network Topology](images/network-topology.jpg)
+
+The Cloak Protocol network consists of:
+
+- **Multiple CloakNodes**: Distributed nodes that maintain state and process proofs
+- **Psy Protocol Network**: Central blockchain with PARTH lanes for parallel execution
+- **End Users**: Connect to nearest CloakNode for optimal latency
+
+### State Management Architecture
+
+![State Management Architecture](images/state-management.jpg)
+
+The state management system uses:
+
+- **Merkle Tree**: Binary tree with Poseidon-2 hashing (32 levels, 2^32 max leaves)
+- **Per-User State**: Each user has a unique leaf in the Merkle tree
+- **RocksDB Persistence**: All state changes are persisted to disk for recovery
+- **State Roots**: Merkle roots are committed on-chain for verification
+
+### Security Model
+
+![Security Model](images/security-model.jpg)
+
+Multi-layer security protection:
+
+- **Client-Side Proving**: Proofs generated locally, private keys never leave device
+- **Merkle Proof Validation**: Cryptographic verification of state transitions
+- **SDKey Identity**: Privacy-preserving identity with embedded KYC/AML predicates
+- **On-Chain Verification**: Public verification of proofs without revealing private data
+
+**Threat Mitigation**: Front-running and censorship attacks are blocked by the ZK proof system.
+
+### Performance Flow
+
+![Performance Flow](images/performance-flow.jpg)
+
+Performance metrics across different scales:
+
+| Stage | Latency | Throughput |
+|-------|---------|------------|
+| Proof Generation | 180ms | ~5.5 TPS per user |
+| Proof Submission | 10ms | ~100 TPS |
+| On-Chain Verify | 50ms | ~20 TPS |
+| **Total Settlement** | **240ms** | **~4.1 TPS per user** |
+| 1000 Users (parallel) | 240ms | ~4,100 TPS |
+| Batch Mode (64 proofs) | 100ms | ~12,000 TPS |
+| PoW 2.0 Theoretical | N/A | **1.2M TPS** |
+
+### Deployment Architecture
+
+![Deployment Architecture](images/deployment-architecture.jpg)
+
+Production deployment structure:
+
+- **Cloud Infrastructure**: Hosts frontend, API server, CloakNode, and RocksDB
+- **Psy Protocol Network**: External blockchain network with PARTH lanes
+- **End Users**: Access via browser or mobile app over HTTPS/WebSocket
 
 ---
 

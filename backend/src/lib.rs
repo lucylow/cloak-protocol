@@ -17,6 +17,7 @@ pub mod deploy;
 pub use error::{CloakError, CloakResult};
 
 pub use api::server::ApiServer;
+pub use api::bridge;
 pub use node::CloakNode;
 pub use psy_client::PsyClient;
 pub use state::{StateManager, UserState};
@@ -29,8 +30,10 @@ pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 pub struct CloakConfig {
     /// Psy Protocol testnet RPC endpoint
     pub psy_rpc_url: String,
-    /// Local API server bind address
+    /// Local gRPC API server bind address
     pub api_bind_addr: String,
+    /// REST API bridge server port
+    pub rest_api_port: u16,
     /// RocksDB database path
     pub db_path: String,
     /// Enable verbose logging
@@ -39,9 +42,16 @@ pub struct CloakConfig {
 
 impl Default for CloakConfig {
     fn default() -> Self {
+        // Get REST API port from environment or use default
+        let rest_api_port = std::env::var("API_PORT")
+            .unwrap_or_else(|_| "8080".to_string())
+            .parse::<u16>()
+            .unwrap_or(8080);
+        
         Self {
             psy_rpc_url: "https://testnet-rpc.psy.xyz".to_string(),
             api_bind_addr: "127.0.0.1:50051".to_string(),
+            rest_api_port,
             db_path: "./cloak_state.db".to_string(),
             verbose: false,
         }

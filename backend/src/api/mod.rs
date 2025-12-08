@@ -4,6 +4,7 @@
 //! Implements health checks, proof submission, and state management endpoints.
 
 pub mod server;
+pub mod bridge;
 
 pub use server::ApiServer;
 

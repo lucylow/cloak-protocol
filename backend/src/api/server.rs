@@ -7,8 +7,11 @@ use crate::error::{CloakError, CloakResult};
 use crate::node::CloakNode;
 use crate::api::{HealthCheckResponse, QueryStateRequest, QueryStateResponse, SubmitProofRequest, SubmitProofResponse};
 use std::sync::Arc;
-use tracing::{debug, info, warn};
+use tracing::{debug, info};
 use hex;
+
+/// Expected length of an SDKey hash in bytes
+const SDKEY_HASH_LEN: usize = 32;
 
 /// The Cloak Protocol API Server
 #[derive(Clone)]
@@ -26,6 +29,18 @@ impl ApiServer {
     /// # Arguments
     /// * `node` - Reference to the Cloak node
     /// * `bind_addr` - Address to bind the server to (e.g., "127.0.0.1:50051")
+    ///
+    /// # Example
+    /// ```
+    /// use std::sync::Arc;
+    /// use cloak_protocol::{ApiServer, CloakNode};
+    ///
+    /// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
+    /// let node = Arc::new(CloakNode::new("https://testnet-rpc.psy.xyz", "./db").await?);
+    /// let server = ApiServer::new(node, "127.0.0.1:50051".to_string());
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn new(node: Arc<CloakNode>, bind_addr: String) -> Self {
         Self { node, bind_addr }
     }
@@ -59,15 +74,35 @@ impl ApiServer {
     /// Health check endpoint
     ///
     /// Returns the current status of the node and Psy connection
+    ///
+    /// # Returns
+    /// A `HealthCheckResponse` containing:
+    /// - Overall health status
+    /// - Psy Protocol connection status
+    /// - Current block height (from Psy client if available)
+    /// - Number of active users
+    /// - Current Merkle root
+    /// - Backend version
     pub async fn health_check(&self) -> CloakResult<HealthCheckResponse> {
         debug!("Health check requested");
 
         let node_status = self.node.get_status().await;
+        
+        // Try to get actual block height from Psy client, fallback to 0 if unavailable
+        let block_height = self.node.psy_client.get_last_block_height().await;
+        let block_height = if block_height == 0 {
+            // If not set, try to get from chain state
+            self.node.psy_client.get_chain_state().await
+                .map(|header| header.height)
+                .unwrap_or(0)
+        } else {
+            block_height
+        };
 
         Ok(HealthCheckResponse {
             status: if node_status.is_running { "healthy" } else { "unhealthy" }.to_string(),
             psy_connected: node_status.psy_connected,
-            block_height: 1000, // TODO: Get actual block height from Psy
+            block_height,
             active_users: node_status.active_users,
             merkle_root: node_status.state_root,
             version: crate::VERSION.to_string(),
@@ -80,7 +115,14 @@ impl ApiServer {
     /// * `request` - The proof submission request
     ///
     /// # Returns
-    /// A SubmitProofResponse with transaction details
+    /// A `SubmitProofResponse` with transaction details
+    ///
+    /// # Errors
+    /// Returns `CloakError::InvalidInput` if:
+    /// - Proof data is empty
+    /// - Public inputs are empty
+    /// - User SDKey hash is invalid
+    /// - Signature is empty
     ///
     /// # TODO for Part 2:
     /// - Validate proof format
@@ -96,7 +138,20 @@ impl ApiServer {
 
         // Validate proof data is not empty
         if request.proof_data.is_empty() {
-            return Err(CloakError::InvalidInput("Proof data cannot be empty".to_string()));
+            return Err(CloakError::invalid_input("Proof data cannot be empty"));
+        }
+
+        // Validate public inputs
+        if request.public_inputs.is_empty() {
+            return Err(CloakError::invalid_input("Public inputs cannot be empty"));
+        }
+
+        // Validate user SDKey hash format
+        Self::parse_sdkey_hash(&request.user_sdkey_hash)?;
+
+        // Validate signature is not empty
+        if request.signature.is_empty() {
+            return Err(CloakError::invalid_input("Signature cannot be empty"));
         }
 
         // TODO: Validate proof format
@@ -116,10 +171,18 @@ impl ApiServer {
     /// Queries the current state of a user
     ///
     /// # Arguments
-    /// * `request` - The state query request
+    /// * `request` - The state query request containing the user's SDKey hash
     ///
     /// # Returns
-    /// A QueryStateResponse with the user's state
+    /// A `QueryStateResponse` with the user's state including:
+    /// - Merkle root commitment
+    /// - Token balances
+    /// - Current nonce
+    /// - Last updated block height
+    ///
+    /// # Errors
+    /// Returns `CloakError::InvalidInput` if the SDKey hash format is invalid.
+    /// Returns `CloakError::UserNotFound` if the user does not exist.
     ///
     /// # TODO for Part 2:
     /// - Add privacy-preserving state queries
@@ -132,18 +195,7 @@ impl ApiServer {
         debug!("State query requested for user: {}", request.user_sdkey_hash);
 
         // Parse SDKey hash from hex string
-        let sdkey_hash_hex = request.user_sdkey_hash.trim_start_matches("0x");
-        let sdkey_hash_bytes = hex::decode(sdkey_hash_hex)
-            .map_err(|e| CloakError::InvalidInput(format!("Invalid hex encoding: {}", e)))?;
-        
-        if sdkey_hash_bytes.len() != 32 {
-            return Err(CloakError::InvalidInput(
-                format!("SDKey hash must be 32 bytes, got {}", sdkey_hash_bytes.len())
-            ));
-        }
-        
-        let mut sdkey_hash = [0u8; 32];
-        sdkey_hash.copy_from_slice(&sdkey_hash_bytes);
+        let sdkey_hash = Self::parse_sdkey_hash(&request.user_sdkey_hash)?;
 
         // Get user state from state manager
         let state_manager = self.node.state_manager.read().await;
@@ -161,6 +213,15 @@ impl ApiServer {
 
     /// Broadcasts an encrypted order intent to the order relay network
     ///
+    /// # Arguments
+    /// * `order` - The encrypted order intent message
+    ///
+    /// # Returns
+    /// An order ID string for tracking the order
+    ///
+    /// # Errors
+    /// Returns `CloakError::InvalidInput` if the order format is invalid.
+    ///
     /// # TODO for Part 2:
     /// - Implement P2P order book network
     /// - Add order matching engine
@@ -168,11 +229,23 @@ impl ApiServer {
     /// - Add order expiration and cancellation
     pub async fn broadcast_order_intent(
         &self,
-        _order: crate::api::OrderIntentMessage,
+        order: crate::api::OrderIntentMessage,
     ) -> CloakResult<String> {
-        debug!("Order intent broadcast requested");
+        debug!("Order intent broadcast requested for user: {}", order.user_sdkey_hash);
 
-        // TODO: Validate order format
+        // Validate order format
+        if order.encrypted_order.is_empty() {
+            return Err(CloakError::invalid_input("Encrypted order data cannot be empty"));
+        }
+
+        // Validate user SDKey hash format
+        Self::parse_sdkey_hash(&order.user_sdkey_hash)?;
+
+        // Validate signature
+        if order.signature.is_empty() {
+            return Err(CloakError::invalid_input("Order signature cannot be empty"));
+        }
+
         // TODO: Verify user signature
         // TODO: Broadcast to order relay network
         // TODO: Return order ID
@@ -190,6 +263,36 @@ impl ApiServer {
     pub async fn get_active_users(&self) -> CloakResult<usize> {
         let state_manager = self.node.state_manager.read().await;
         Ok(state_manager.get_user_count())
+    }
+
+    /// Parses an SDKey hash from a hex string
+    ///
+    /// # Arguments
+    /// * `hex_str` - Hex string representation of the SDKey hash (with or without "0x" prefix)
+    ///
+    /// # Returns
+    /// A 32-byte array representing the SDKey hash
+    ///
+    /// # Errors
+    /// Returns `CloakError::InvalidInput` if:
+    /// - The hex string is invalid
+    /// - The decoded bytes are not exactly 32 bytes
+    fn parse_sdkey_hash(hex_str: &str) -> CloakResult<[u8; SDKEY_HASH_LEN]> {
+        let hex_str = hex_str.trim_start_matches("0x");
+        let sdkey_hash_bytes = hex::decode(hex_str)
+            .map_err(|e| CloakError::invalid_input(format!("Invalid hex encoding: {}", e)))?;
+        
+        if sdkey_hash_bytes.len() != SDKEY_HASH_LEN {
+            return Err(CloakError::invalid_input(format!(
+                "SDKey hash must be {} bytes, got {}",
+                SDKEY_HASH_LEN,
+                sdkey_hash_bytes.len()
+            )));
+        }
+        
+        let mut sdkey_hash = [0u8; SDKEY_HASH_LEN];
+        sdkey_hash.copy_from_slice(&sdkey_hash_bytes);
+        Ok(sdkey_hash)
     }
 }
 

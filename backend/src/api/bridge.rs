@@ -317,7 +317,8 @@ pub async fn run_server(port: u16) -> Result<(), CloakError> {
     tracing::info!("REST API server listening on {}", addr);
     
     let listener = tokio::net::TcpListener::bind(&addr).await?;
-    axum::serve(listener, app).await?;
+    axum::serve(listener, app).await
+        .map_err(|e| CloakError::Network(format!("Failed to start HTTP server: {}", e)))?;
     
     Ok(())
 }

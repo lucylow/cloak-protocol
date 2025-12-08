@@ -218,7 +218,14 @@ export class CloakApiClient {
       return;
     }
 
-    const wsUrl = this.config.baseUrl.replace('http', 'ws') + '/ws';
+    // In development with Vite proxy, use relative URL; otherwise construct from baseUrl
+    let wsUrl: string;
+    if (this.config.baseUrl.includes('localhost') && import.meta.env.MODE === 'development') {
+      // Use relative URL for Vite proxy in development
+      wsUrl = 'ws://localhost:5173/ws';
+    } else {
+      wsUrl = this.config.baseUrl.replace('http', 'ws').replace('https', 'wss') + '/ws';
+    }
     
     try {
       this.wsConnection = new WebSocket(wsUrl);
@@ -366,13 +373,18 @@ export class MockApiClient extends CloakApiClient {
 
 // Auto-detect mode based on environment
 export function createApiClient(): CloakApiClient {
-  const useMockMode = import.meta.env.VITE_USE_MOCK_API === 'true' || 
-                       import.meta.env.MODE === 'development';
+  // Use mock mode only if explicitly enabled, not by default in development
+  const useMockMode = import.meta.env.VITE_USE_MOCK_API === 'true';
   
   if (useMockMode) {
-    console.log('Using Mock API Client for development/Lovable hosting');
+    console.log('Using Mock API Client (VITE_USE_MOCK_API=true)');
     return new MockApiClient();
   }
   
-  return getApiClient();
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+  console.log(`Using Cloak API Client with base URL: ${apiUrl}`);
+  
+  return getApiClient({
+    baseUrl: apiUrl
+  });
 }

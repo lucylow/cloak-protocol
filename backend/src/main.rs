@@ -33,16 +33,27 @@ async fn main() -> Result<(), CloakError> {
     );
     info!("Cloak node initialized successfully");
 
-    // Initialize the API server
-    let api_server = ApiServer::new(node.clone(), config.api_bind_addr.clone());
-    info!("API server initialized on {}", config.api_bind_addr);
+    // Initialize the REST API bridge server (for frontend)
+    info!("Starting REST API bridge server on port {}", config.rest_api_port);
+    let bridge_handle = {
+        let port = config.rest_api_port;
+        tokio::spawn(async move {
+            if let Err(e) = cloak_backend::api::bridge::run_server(port).await {
+                error!("REST API bridge server error: {}", e);
+            }
+        })
+    };
 
-    // Spawn the API server in a background task
+    // Initialize the gRPC API server (for future use)
+    let api_server = ApiServer::new(node.clone(), config.api_bind_addr.clone());
+    info!("gRPC API server initialized on {} (placeholder)", config.api_bind_addr);
+
+    // Spawn the gRPC API server in a background task
     let api_server_handle = {
         let api_server = api_server.clone();
         tokio::spawn(async move {
             if let Err(e) = api_server.start().await {
-                error!("API server error: {}", e);
+                error!("gRPC API server error: {}", e);
             }
         })
     };
@@ -55,8 +66,19 @@ async fn main() -> Result<(), CloakError> {
     })?;
     info!("Event loop completed");
 
-    // Wait for API server to complete (it runs indefinitely)
-    let _ = api_server_handle.await;
+    // Wait for API servers to complete (they run indefinitely)
+    tokio::select! {
+        result = bridge_handle => {
+            if let Err(e) = result {
+                error!("Bridge server task error: {}", e);
+            }
+        }
+        result = api_server_handle => {
+            if let Err(e) = result {
+                error!("gRPC API server task error: {}", e);
+            }
+        }
+    }
 
     Ok(())
 }

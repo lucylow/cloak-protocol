@@ -15,6 +15,12 @@ const SettingsPage = lazy(() => import('./app/Settings'));
 const GovernancePage = lazy(() => import('./app/Governance'));
 const DexDemo = lazy(() => import('./app/DexDemo'));
 const RwaMarket = lazy(() => import('./app/RwaMarket'));
+const AnalyticsPage = lazy(() => import('./app/Analytics'));
+const ActivityPage = lazy(() => import('./app/Activity'));
+const HelpPage = lazy(() => import('./app/Help'));
+const SecurityPage = lazy(() => import('./app/Security'));
+const BridgePage = lazy(() => import('./app/Bridge'));
+const StakingPage = lazy(() => import('./app/Staking'));
 
 // Loading fallback for route components
 const RouteLoader = () => (
@@ -58,6 +64,12 @@ const AppRoutes = () => {
           <Route path="/governance" element={<GovernancePage />} />
           <Route path="/demo/dex" element={<DexDemo />} />
           <Route path="/demo/rwa" element={<RwaMarket />} />
+          <Route path="/analytics" element={<AnalyticsPage />} />
+          <Route path="/activity" element={<ActivityPage />} />
+          <Route path="/help" element={<HelpPage />} />
+          <Route path="/security" element={<SecurityPage />} />
+          <Route path="/bridge" element={<BridgePage />} />
+          <Route path="/staking" element={<StakingPage />} />
         </Routes>
       </Suspense>
     </AppLayout>
