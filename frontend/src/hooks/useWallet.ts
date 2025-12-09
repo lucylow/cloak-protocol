@@ -5,44 +5,57 @@ export interface WalletState {
   isConnecting: boolean;
   address: string | null;
   balance: {
-    ETH: number;
+    SOL: number;
     USDC: number;
   };
-  chainId: number;
+  walletType: 'phantom' | 'mock' | null;
   chainName: string;
 }
 
-const MOCK_ADDRESSES = [
-  '0x742d35Cc6634C0532925a3b844Bc9e7595f8abE9',
-  '0x8ba1f109551bD432803012645Ac136ddd64DBA72',
-  '0xdD2FD4581271e230360230F9337D5c0430Bf44C0',
-  '0x1CBd3b2770909D4e10f157cABC84C7264073C9Ec',
+// Mock Solana addresses for fallback
+const MOCK_SOLANA_ADDRESSES = [
+  '7EcDhSYGxXyscszYEp35KHN8vvw3svAuLKTzXwCFLtV',
+  'DYw8jCTfwHNRJhhmFcbXvVDTqWMEVFBX6ZKUmG5CNSKK',
+  '4rL4RCWHz3iNCdCaveD8KcHfV9YagGtotFsJiE6FLhPb',
+  'HN7cABqLq46Es1jh92dQQisAq662SmxELLLsHHe4YWrH',
 ];
 
-const CHAINS = [
-  { id: 1, name: 'Ethereum Mainnet' },
-  { id: 137, name: 'Polygon' },
-  { id: 42161, name: 'Arbitrum One' },
-  { id: 10, name: 'Optimism' },
-];
+// Check if Phantom is installed
+const getPhantomProvider = () => {
+  if (typeof window !== 'undefined' && 'solana' in window) {
+    const provider = (window as any).solana;
+    if (provider?.isPhantom) {
+      return provider;
+    }
+  }
+  return null;
+};
 
 export function useWallet() {
   const [wallet, setWallet] = useState<WalletState>({
     isConnected: false,
     isConnecting: false,
     address: null,
-    balance: { ETH: 0, USDC: 0 },
-    chainId: 1,
-    chainName: 'Ethereum Mainnet',
+    balance: { SOL: 0, USDC: 0 },
+    walletType: null,
+    chainName: 'Solana Mainnet',
   });
 
   // Load wallet state from localStorage
   useEffect(() => {
-    const saved = localStorage.getItem('cloak-wallet');
+    const saved = localStorage.getItem('cloak-wallet-solana');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        setWallet(prev => ({ ...prev, ...parsed }));
+        // If it was a Phantom connection, try to reconnect
+        if (parsed.walletType === 'phantom') {
+          const provider = getPhantomProvider();
+          if (provider?.isConnected) {
+            setWallet(prev => ({ ...prev, ...parsed }));
+          }
+        } else {
+          setWallet(prev => ({ ...prev, ...parsed }));
+        }
       } catch (e) {
         // Ignore parse errors
       }
@@ -52,68 +65,126 @@ export function useWallet() {
   // Save wallet state to localStorage
   useEffect(() => {
     if (wallet.isConnected) {
-      localStorage.setItem('cloak-wallet', JSON.stringify(wallet));
+      localStorage.setItem('cloak-wallet-solana', JSON.stringify(wallet));
     } else {
-      localStorage.removeItem('cloak-wallet');
+      localStorage.removeItem('cloak-wallet-solana');
     }
   }, [wallet]);
 
-  const connect = useCallback(async () => {
-    setWallet(prev => ({ ...prev, isConnecting: true }));
+  // Listen for Phantom disconnect events
+  useEffect(() => {
+    const provider = getPhantomProvider();
+    if (provider) {
+      const handleDisconnect = () => {
+        setWallet({
+          isConnected: false,
+          isConnecting: false,
+          address: null,
+          balance: { SOL: 0, USDC: 0 },
+          walletType: null,
+          chainName: 'Solana Mainnet',
+        });
+        localStorage.removeItem('cloak-wallet-solana');
+      };
 
-    // Simulate MetaMask connection delay
-    await new Promise(resolve => setTimeout(resolve, 1500 + Math.random() * 1000));
+      provider.on('disconnect', handleDisconnect);
+      return () => {
+        provider.off('disconnect', handleDisconnect);
+      };
+    }
+  }, []);
 
-    const randomAddress = MOCK_ADDRESSES[Math.floor(Math.random() * MOCK_ADDRESSES.length)];
-    const randomChain = CHAINS[Math.floor(Math.random() * CHAINS.length)];
+  const connectMock = useCallback(async () => {
+    // Simulate connection delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    const randomAddress = MOCK_SOLANA_ADDRESSES[Math.floor(Math.random() * MOCK_SOLANA_ADDRESSES.length)];
 
     setWallet({
       isConnected: true,
       isConnecting: false,
       address: randomAddress,
       balance: {
-        ETH: Math.random() * 10 + 0.5,
+        SOL: Math.random() * 50 + 1,
         USDC: Math.floor(Math.random() * 50000) + 1000,
       },
-      chainId: randomChain.id,
-      chainName: randomChain.name,
+      walletType: 'mock',
+      chainName: 'Solana Mainnet (Mock)',
     });
   }, []);
 
-  const disconnect = useCallback(() => {
+  const connect = useCallback(async () => {
+    setWallet(prev => ({ ...prev, isConnecting: true }));
+
+    const provider = getPhantomProvider();
+
+    if (provider) {
+      try {
+        // Try connecting to Phantom
+        const response = await provider.connect();
+        const publicKey = response.publicKey.toString();
+
+        setWallet({
+          isConnected: true,
+          isConnecting: false,
+          address: publicKey,
+          balance: {
+            SOL: 0, // Will be fetched separately in a real app
+            USDC: 0,
+          },
+          walletType: 'phantom',
+          chainName: 'Solana Mainnet',
+        });
+
+        // Optionally fetch balance here using Solana web3.js
+        // For now, we'll show a placeholder
+
+      } catch (err: any) {
+        console.warn('Phantom connection failed, falling back to mock:', err.message);
+        // Fallback to mock if user rejects or error occurs
+        await connectMock();
+      }
+    } else {
+      // Phantom not installed, use mock
+      console.log('Phantom wallet not found, using mock wallet');
+      await connectMock();
+    }
+  }, [connectMock]);
+
+  const disconnect = useCallback(async () => {
+    const provider = getPhantomProvider();
+    
+    if (provider && wallet.walletType === 'phantom') {
+      try {
+        await provider.disconnect();
+      } catch (e) {
+        // Ignore disconnect errors
+      }
+    }
+
     setWallet({
       isConnected: false,
       isConnecting: false,
       address: null,
-      balance: { ETH: 0, USDC: 0 },
-      chainId: 1,
-      chainName: 'Ethereum Mainnet',
+      balance: { SOL: 0, USDC: 0 },
+      walletType: null,
+      chainName: 'Solana Mainnet',
     });
-    localStorage.removeItem('cloak-wallet');
-  }, []);
-
-  const switchChain = useCallback(async (chainId: number) => {
-    const chain = CHAINS.find(c => c.id === chainId);
-    if (chain) {
-      setWallet(prev => ({
-        ...prev,
-        chainId: chain.id,
-        chainName: chain.name,
-      }));
-    }
-  }, []);
+    localStorage.removeItem('cloak-wallet-solana');
+  }, [wallet.walletType]);
 
   const formatAddress = useCallback((address: string | null) => {
     if (!address) return '';
-    return `${address.slice(0, 6)}...${address.slice(-4)}`;
+    return `${address.slice(0, 4)}...${address.slice(-4)}`;
   }, []);
+
+  const isPhantomInstalled = getPhantomProvider() !== null;
 
   return {
     ...wallet,
     connect,
     disconnect,
-    switchChain,
     formatAddress,
-    availableChains: CHAINS,
+    isPhantomInstalled,
   };
 }
