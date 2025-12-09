@@ -330,39 +330,50 @@ export class MockApiClient extends CloakApiClient {
 
   async queryState(userSdkey: string) {
     await this.delay(500);
+    // Import mock data dynamically to avoid circular dependencies
+    const { MOCK_POSITIONS, MOCK_ORDERS } = await import('./enhancedMockData');
+    
+    // Convert positions to the expected format
+    const balances = MOCK_POSITIONS.map(pos => ({
+      token: pos.asset,
+      amount: pos.amount,
+      privacy_status: pos.privacyStatus
+    }));
+
     return {
       success: true,
       data: {
-        balances: [
-          { token: 'RWA-CREDIT-01', amount: 125.4, privacy_status: 'shielded' }
-        ],
-        positions: [],
-        orders: []
+        balances,
+        positions: MOCK_POSITIONS,
+        orders: MOCK_ORDERS
       }
     };
   }
 
   async getOrders() {
     await this.delay(300);
+    const { MOCK_ORDERS } = await import('./enhancedMockData');
     return {
       success: true,
-      data: []
+      data: MOCK_ORDERS
     };
   }
 
   async getPositions() {
     await this.delay(300);
+    const { MOCK_POSITIONS } = await import('./enhancedMockData');
     return {
       success: true,
-      data: []
+      data: MOCK_POSITIONS
     };
   }
 
   async getProofs() {
     await this.delay(300);
+    const { MOCK_PROOFS } = await import('./enhancedMockData');
     return {
       success: true,
-      data: []
+      data: MOCK_PROOFS
     };
   }
 

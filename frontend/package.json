@@ -5,8 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:mock": "VITE_USE_MOCK_API=true vite",
     "build": "vite build",
     "build:dev": "vite build --mode development",
+    "build:production": "tsc && vite build --mode production",
     "preview": "vite preview --port 5174",
     "lint": "eslint . || true",
     "test": "vitest"

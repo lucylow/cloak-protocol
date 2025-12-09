@@ -369,7 +369,7 @@ export const MOCK_TRADE_HISTORY: TradeHistory[] = [
     asset: 'RWA-ESTATE-NYC',
     side: 'buy',
     amount: 1.5,
-    currentPrice: 980000,
+    price: 980000,
     total: 1470000,
     proofId: 'PROOF-H002',
     txHash: '0xdef456...',
