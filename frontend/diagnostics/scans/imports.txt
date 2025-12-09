@@ -1,0 +1,2 @@
+No bad imports from 'src/' found - all imports use '@/' alias or relative paths.
+

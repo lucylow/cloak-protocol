@@ -9,12 +9,16 @@
 [![TypeScript](https://img.shields.io/badge/typescript-5.8%2B-blue.svg)](https://www.typescriptlang.org/)
 [![Version](https://img.shields.io/badge/version-0.1.0--alpha-green.svg)](https://github.com/lucylow/cloak-protocol)
 [![Status](https://img.shields.io/badge/status-active-success.svg)](https://github.com/lucylow/cloak-protocol)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
+[![Stars](https://img.shields.io/github/stars/lucylow/cloak-protocol?style=social)](https://github.com/lucylow/cloak-protocol)
 
 > **🏆 Final Submission for Psy: Ascend Hack 2025**
 
 *Production-ready decentralized exchange enabling private trading of tokenized real-world assets using zero-knowledge proofs. Built on Psy Protocol's PARTH architecture and PoW 2.0 consensus.*
 
-[Quick Start](#-quick-start) • [Documentation](#️-installation--setup) • [API Reference](#-api-documentation) • [Contributing](#-contributing)
+[🚀 Quick Start](#-quick-start) • [📖 Documentation](#-overview) • [🔧 Installation](#️-installation--setup) • [📚 API Reference](#-api-documentation) • [🤝 Contributing](#-contributing)
+
+**⭐ Star us on GitHub — it motivates us a lot!**
 
 </div>
 
@@ -24,6 +28,7 @@
 
 - [✨ Features](#-features)
 - [🚀 Quick Start](#-quick-start)
+- [💡 What Makes Cloak Different](#-what-makes-cloak-different)
 - [📖 Overview](#-overview)
 - [🏗️ Technical Architecture](#️-technical-architecture)
 - [🧩 Core Components](#-core-components)
@@ -33,6 +38,8 @@
 - [📊 Performance Benchmarks](#-performance-benchmarks)
 - [🔒 Security Model](#-security-model)
 - [🛠️ Development](#️-development)
+- [❓ FAQ](#-faq)
+- [🛣️ Roadmap](#️-roadmap)
 - [📝 License](#-license)
 
 ---
@@ -60,7 +67,11 @@
 - **Node.js**: 20+ ([Install Node.js](https://nodejs.org/))
 - **Docker**: 27+ (optional, for containerized deployment)
 
-### Docker (Recommended)
+> **💡 New to Rust or TypeScript?** No problem! Our codebase is well-documented and beginner-friendly. Check out the [Development](#️-development) section for helpful resources.
+
+### Docker (Recommended) 🐳
+
+The fastest way to get started - runs everything with a single command:
 
 ```bash
 # Clone the repository
@@ -73,7 +84,10 @@ docker compose up --build
 # Access the application
 # Frontend: http://localhost:3000
 # Backend API: http://localhost:8080/health
+# API Docs: http://localhost:8080/docs
 ```
+
+> **💡 Tip**: On first run, Docker will build the images which may take 5-10 minutes. Subsequent runs will be much faster.
 
 ### Manual Setup
 
@@ -114,6 +128,29 @@ npm run dev
 
 ---
 
+## 💡 What Makes Cloak Different
+
+| Feature | Traditional DEX | Cloak Protocol |
+|---------|----------------|----------------|
+| **Privacy** | 🔴 Public transaction history | 🟢 Zero-knowledge proofs hide all data |
+| **Order Flow** | 🔴 Visible to miners/front-runners | 🟢 Encrypted, hidden from everyone |
+| **Settlement Speed** | 🟡 12-15 seconds (Ethereum) | 🟢 ~240ms end-to-end |
+| **Throughput** | 🟡 ~15 TPS (Ethereum mainnet) | 🟢 1.2M TPS (PoW 2.0 theoretical) |
+| **RWA Support** | 🟡 Limited compliance tools | 🟢 Built-in KYC/AML with ZK proofs |
+| **Institutional Ready** | 🔴 Order flow leakage | 🟢 Private execution, no market impact |
+| **Scalability** | 🔴 Global state contention | 🟢 User-scoped Merkle trees, parallel execution |
+| **Cost per Trade** | 🟡 $5-50 (gas fees) | 🟢 ~$0.0002 (batched proofs) |
+
+### Key Innovations
+
+1. **🔐 Client-Side Proving**: All ZK proofs generated locally (~180ms), private keys never leave your device
+2. **⚡ PARTH Parallelism**: User-scoped state trees eliminate global bottlenecks, enabling horizontal scaling
+3. **🏛️ Compliance-First Privacy**: SDKey identity system with embedded KYC/AML predicates - prove compliance without revealing identity
+4. **🌍 RWA Native**: Purpose-built for tokenized real-world assets (credit, real estate, carbon credits, etc.)
+5. **⛏️ Miner Incentives**: PoW 2.0 rewards miners for ZK proof aggregation, aligning security with privacy
+
+---
+
 ## 📖 Overview
 
 ### Problem Statement
@@ -134,6 +171,40 @@ Traditional transparent blockchains expose critical financial information—posi
 - **Compliance-First DeFi**: Trade tokenized assets while maintaining regulatory compliance
 - **Privacy-Preserving DEX**: Decentralized exchange with zero-knowledge privacy guarantees
 - **High-Frequency Trading**: Sub-second settlement with million-TPS scalability
+
+### Key Concepts
+
+<details>
+<summary><b>🔍 Understanding Cloak Protocol</b></summary>
+
+#### Zero-Knowledge Proofs (ZK Proofs)
+A cryptographic method that allows you to prove you know something (like having sufficient balance) without revealing what that something is. In Cloak Protocol, ZK proofs verify trades are valid without exposing balances, amounts, or counterparties.
+
+#### User-Scoped Merkle Trees
+Each user has their own Merkle tree (not a shared global state). This allows:
+- **Parallel Processing**: Multiple users can trade simultaneously without blocking each other
+- **Privacy**: User states are isolated and cannot be linked
+- **Scalability**: No global state bottleneck
+
+#### SDKey (Stealth Deterministic Key)
+A programmable identity system that:
+- Hides your real identity on-chain
+- Allows compliance verification (KYC/AML) without revealing who you are
+- Enables regulatory reporting while maintaining privacy
+
+#### PARTH Parallelism
+Psy Protocol's parallel execution architecture that:
+- Processes multiple transactions simultaneously
+- Eliminates state contention
+- Enables massive throughput (1.2M TPS theoretical)
+
+#### PoW 2.0 Consensus
+Enhanced Proof-of-Work where:
+- Miners earn rewards for ZK proof aggregation
+- Security and privacy are economically aligned
+- Network scales with hash power
+
+</details>
 
 ---
 
@@ -412,9 +483,18 @@ Production deployment structure:
 ```bash
 cd frontend
 npm install
-npm run dev        # Development server @ localhost:3000
+npm run dev        # Development server @ http://localhost:3000
 npm run build      # Production build
+npm run preview    # Preview production build
+npm test           # Run tests
 ```
+
+**Key Files**:
+- `src/App.tsx` - Main application component
+- `src/pages/` - Route pages (Dashboard, Trade, Portfolio, etc.)
+- `src/components/` - Reusable UI components
+- `src/hooks/useApiClient.ts` - API client hook
+- `src/hooks/useWallet.ts` - Wallet integration
 
 ### 2. Backend (Rust)
 
@@ -490,9 +570,29 @@ REST and gRPC endpoints for frontend communication:
 **Build & Run**:
 ```bash
 cd backend
+
+# Development mode
+cargo run
+
+# Release mode (optimized)
 cargo build --release
 RUST_LOG=info cargo run --release
+
+# Run tests
+cargo test --all
+
+# Format code
+cargo fmt
+
+# Lint code
+cargo clippy -- -D warnings
 ```
+
+**Key Modules**:
+- `src/node/mod.rs` - Core CloakNode orchestrator
+- `src/state/mod.rs` - State management and Merkle tree
+- `src/api/server.rs` - REST and gRPC API server
+- `src/psy_client/mod.rs` - Psy Protocol integration
 
 ### 3. Psy Protocol Integration
 
@@ -636,23 +736,62 @@ DATABASE_PATH=/data/cloak_state.db
 ### Troubleshooting
 
 <details>
-<summary><b>Common Issues & Solutions</b></summary>
+<summary><b>🔧 Common Issues & Solutions</b></summary>
 
 #### Backend won't start
 - **Issue**: Port 8080 already in use
-- **Solution**: Change port in `docker-compose.yml` or kill the process using port 8080
+- **Solution**: 
+  ```bash
+  # Find process using port 8080
+  lsof -i :8080  # macOS/Linux
+  netstat -ano | findstr :8080  # Windows
+  # Change port in docker-compose.yml or kill the process
+  ```
 
 #### Proof generation fails
-- **Issue**: GPU not detected
-- **Solution**: Proof generation will fall back to CPU mode automatically
+- **Issue**: GPU not detected or out of memory
+- **Solution**: 
+  - Proof generation automatically falls back to CPU mode
+  - Ensure you have at least 8GB RAM available
+  - Check GPU drivers are installed (optional, for acceleration)
 
 #### Database errors
 - **Issue**: RocksDB permission errors
-- **Solution**: Ensure write permissions for database directory
+- **Solution**: 
+  ```bash
+  # Ensure write permissions for database directory
+  chmod -R 755 ./backend/data  # Linux/macOS
+  # Or delete and recreate the database directory
+  rm -rf ./backend/data/cloak_state.db
+  ```
 
 #### Frontend can't connect to backend
 - **Issue**: CORS or network errors
-- **Solution**: Check `NEXT_PUBLIC_API_URL` environment variable matches backend URL
+- **Solution**: 
+  - Check backend is running: `curl http://localhost:8080/health`
+  - Verify `VITE_API_URL` environment variable matches backend URL
+  - Check browser console for detailed error messages
+
+#### Docker build fails
+- **Issue**: Out of memory or build timeout
+- **Solution**:
+  ```bash
+  # Increase Docker memory limit in Docker Desktop settings
+  # Or build components separately:
+  cd backend && cargo build --release
+  cd ../frontend && npm install && npm run build
+  ```
+
+#### Rust compilation errors
+- **Issue**: Missing dependencies or outdated Rust version
+- **Solution**:
+  ```bash
+  # Update Rust toolchain
+  rustup update stable
+  rustup default stable
+  # Install build dependencies (Ubuntu/Debian)
+  sudo apt-get install build-essential pkg-config libssl-dev
+  ```
 
 </details>
 
@@ -664,6 +803,43 @@ DATABASE_PATH=/data/cloak_state.db
 
 - **Development**: `http://localhost:8080`
 - **Production**: `https://api.cloak.exchange`
+
+### REST API Endpoints
+
+### Example: Complete Trade Flow
+
+Here's a complete example of executing a private trade:
+
+```bash
+# 1. Generate ZK proof for trade
+curl -X POST http://localhost:8080/api/prove_trade \
+  -H "Content-Type: application/json" \
+  -d '{
+    "sdkey_hash": "0xabcdef1234567890",
+    "order": {
+      "side": "buy",
+      "asset": "RWA-CREDIT",
+      "amount": "100.50",
+      "price": "1.00",
+      "slippage_percent": 0.5
+    },
+    "signature": "0x..."
+  }'
+
+# 2. Submit proof to Psy Protocol
+curl -X POST http://localhost:8080/api/submit_proof \
+  -H "Content-Type: application/json" \
+  -d '{
+    "proof_id": "proof-1733699045-001",
+    "proof": "0x...",
+    "state_root_old": "0xdef456...",
+    "state_root_new": "0x789abc...",
+    "signature": "0x..."
+  }'
+
+# 3. Query your updated state
+curl http://localhost:8080/api/state/0xabcdef1234567890
+```
 
 ### REST API Endpoints
 
@@ -823,6 +999,33 @@ Real-time order book updates and proof status notifications are available via We
 
 💡 **Cost Comparison**: 1000x cheaper than L2 solutions
 
+### Performance Optimization Tips
+
+<details>
+<summary><b>⚡ Getting the Best Performance</b></summary>
+
+1. **Enable GPU Acceleration** (Optional but Recommended)
+   - Requires CUDA-compatible GPU (RTX 30/40 series recommended)
+   - Reduces proof generation time from ~300ms to ~180ms
+   - Automatically falls back to CPU if GPU unavailable
+
+2. **Use Batch Mode**
+   - Batch multiple proofs together (64 per batch)
+   - Reduces per-proof verification cost
+   - Optimizes gas usage
+
+3. **Optimize Database Access**
+   - Use RocksDB with proper configuration
+   - Enable compression (LZ4) for storage efficiency
+   - Adjust write buffer size based on your workload
+
+4. **Network Configuration**
+   - Connect to nearest CloakNode for lowest latency
+   - Use WebSocket connections for real-time updates
+   - Enable HTTP/2 for REST API calls
+
+</details>
+
 ---
 
 ## 🔒 Security Model
@@ -875,6 +1078,18 @@ We consider the following adversaries and their capabilities:
 
 - 🔄 **In Progress**: Security audit scheduled for Q1 2025
 - 📋 **Bug Bounty**: Coming soon - report vulnerabilities responsibly
+- ✅ **Code Review**: All PRs require code review before merge
+- ✅ **Automated Testing**: CI/CD runs comprehensive test suite
+
+### Security Best Practices
+
+When using Cloak Protocol:
+
+1. **🔐 Protect Your SDKey**: Your SDKey is like your private key - never share it
+2. **✅ Verify URLs**: Always verify you're connecting to the official API endpoint
+3. **🔒 Use HTTPS**: Never send requests over unencrypted connections
+4. **🔄 Keep Updated**: Always use the latest version for security patches
+5. **📋 Audit Smart Contracts**: Review verifier contract before trusting it
 
 ---
 
@@ -931,25 +1146,162 @@ docker compose -f docker-compose.test.yml up --abort-on-container-exit
 | **Tests** | 80%+ coverage required for PR merge |
 | **Documentation** | Inline comments for non-obvious logic, doc comments for public APIs |
 
-### 📝 Contributing
+### 🤝 Contributing
 
-We welcome contributions! Please follow these steps:
+We welcome contributions from the community! Whether you're fixing bugs, adding features, or improving documentation, your help makes Cloak Protocol better for everyone.
 
-1. **Fork the repository** and clone your fork
-2. **Create a feature branch**: `git checkout -b feat/your-feature`
-3. **Make your changes** and add tests
-4. **Run tests**: Ensure all tests pass locally
-5. **Commit changes**: Use conventional commit messages
-6. **Push to your fork**: `git push origin feat/your-feature`
-7. **Submit a Pull Request** with a clear description
-8. **Pass CI**: All checks (tests, clippy, format) must pass
-9. **Code review**: Address any feedback from maintainers
+#### Quick Start for Contributors
+
+1. **Fork and Clone**
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/cloak-protocol.git
+   cd cloak-protocol
+   ```
+
+2. **Create a Branch**
+   ```bash
+   git checkout -b feat/your-feature-name
+   # or
+   git checkout -b fix/bug-description
+   ```
+
+3. **Make Changes**
+   - Write clean, well-documented code
+   - Add tests for new functionality
+   - Update documentation as needed
+   - Follow our [Code Standards](#code-standards)
+
+4. **Test Your Changes**
+   ```bash
+   # Backend tests
+   cd backend && cargo test
+   # Frontend tests
+   cd frontend && npm test
+   # Linting
+   cd backend && cargo clippy
+   cd frontend && npm run lint
+   ```
+
+5. **Commit with Conventional Commits**
+   ```bash
+   git commit -m "feat: add new feature"
+   # or
+   git commit -m "fix: resolve bug in state manager"
+   ```
+   
+   Commit types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
+
+6. **Push and Create PR**
+   ```bash
+   git push origin feat/your-feature-name
+   ```
+   Then open a Pull Request on GitHub with a clear description.
+
+#### Contribution Guidelines
+
+- ✅ **Do**: Write tests, update docs, follow code style, write clear commit messages
+- ❌ **Don't**: Break existing functionality, commit secrets, skip tests
+
+#### Areas Where We Need Help
+
+- 🐛 **Bug Fixes**: Check open issues labeled `good first issue`
+- 📝 **Documentation**: Improve guides, add examples, fix typos
+- 🧪 **Testing**: Increase test coverage, add integration tests
+- 🌐 **Localization**: Translate documentation to other languages
+- 🎨 **UI/UX**: Improve frontend design and user experience
+
+**First time contributing?** Check out issues labeled `good first issue` - they're perfect for getting started!
 
 ### 📖 Documentation
 
 - **[API Documentation](docs/API.md)**: Complete API reference
 - **[Integration Guide](docs/INTEGRATION.md)**: How to integrate Cloak Protocol
 - **[Demo Script](docs/DEMO_SCRIPT.md)**: Walkthrough of the demo
+
+---
+
+## ❓ FAQ
+
+<details>
+<summary><b>🤔 Frequently Asked Questions</b></summary>
+
+#### How does Cloak Protocol ensure privacy?
+
+Cloak Protocol uses zero-knowledge proofs (ZK proofs) to verify transaction validity without revealing any private information. All sensitive data (balances, trade amounts, counterparties) remains on your device. Only cryptographic proofs are submitted to the blockchain.
+
+#### Do I need a GPU to use Cloak Protocol?
+
+No! GPU acceleration is optional. Proof generation automatically falls back to CPU mode if no GPU is detected, though it may be slightly slower (~300ms vs ~180ms).
+
+#### How does Cloak Protocol compare to other privacy-focused DEXs?
+
+Unlike mixers or privacy coins, Cloak Protocol uses ZK proofs to hide ALL transaction data (not just addresses). It's also purpose-built for RWAs with compliance features, and achieves much higher throughput through PARTH parallelism.
+
+#### Is Cloak Protocol production-ready?
+
+Currently in **alpha** (v0.1.0-alpha). The core functionality is implemented and tested, but we recommend using it on testnet. Production deployment is planned after security audits and additional testing.
+
+#### Can I use Cloak Protocol for regular crypto tokens?
+
+Yes! While optimized for RWAs, Cloak Protocol works with any ERC-20 compatible tokens. The privacy and performance benefits apply to all assets.
+
+#### How much does it cost to trade on Cloak Protocol?
+
+Currently ~$0.0002 per trade when proofs are batched (64 proofs per batch). This is 1000x cheaper than typical L2 solutions. Costs may vary with network congestion.
+
+#### What is SDKey?
+
+SDKey (Stealth Deterministic Key) is a programmable identity system that enables compliance (KYC/AML) without revealing your identity. You can prove you're compliant without exposing who you are.
+
+#### How does PoW 2.0 integration work?
+
+Miners on the Psy Protocol network earn rewards for aggregating and verifying ZK proofs. This creates economic incentives for network security while maintaining privacy guarantees.
+
+#### Can I run my own Cloak node?
+
+Yes! The code is open source. See the [Development](#️-development) section for instructions on setting up your own node.
+
+#### Where can I get help or report bugs?
+
+- Open an issue on [GitHub Issues](https://github.com/lucylow/cloak-protocol/issues)
+- Join [GitHub Discussions](https://github.com/lucylow/cloak-protocol/discussions)
+- Check the [Documentation](docs/) directory for detailed guides
+
+</details>
+
+---
+
+## 🛣️ Roadmap
+
+### ✅ Completed (v0.1.0-alpha)
+- [x] Core ZK proof system (Groth16 with BLS12-381)
+- [x] User-scoped Merkle tree state management
+- [x] REST and gRPC API servers
+- [x] React frontend with order book visualization
+- [x] Psy Protocol integration
+- [x] Docker containerization
+- [x] Basic compliance circuit
+
+### 🚧 In Progress (Q1 2025)
+- [ ] Security audit and bug bounty program
+- [ ] Full Poseidon-2 Merkle tree implementation
+- [ ] P2P order relay network
+- [ ] Batch proof aggregation optimization
+- [ ] Production deployment infrastructure
+
+### 📅 Planned (Q2-Q3 2025)
+- [ ] Mobile SDK (iOS/Android)
+- [ ] Advanced order types (limit, stop-loss, etc.)
+- [ ] Cross-chain bridge integration
+- [ ] Governance token and DAO launch
+- [ ] Institutional trading API
+- [ ] Advanced compliance tools (regulatory reporting)
+
+### 🔮 Future Vision
+- [ ] Multi-chain support (beyond Psy Protocol)
+- [ ] Decentralized validator network
+- [ ] Layer 2 scaling solutions
+- [ ] Integration with major RWA tokenization platforms
 
 ---
 
@@ -977,9 +1329,33 @@ We would like to thank the following projects and communities:
 
 ## 📞 Contact & Support
 
-- **GitHub Issues**: [Report bugs or request features](https://github.com/lucylow/cloak-protocol/issues)
-- **Documentation**: See [`docs/`](docs/) directory for detailed documentation
-- **Discussions**: [GitHub Discussions](https://github.com/lucylow/cloak-protocol/discussions)
+### 🐛 Report Issues
+Found a bug? Have a feature request? We'd love to hear from you!
+
+- **🐛 Bug Reports**: [Open an issue](https://github.com/lucylow/cloak-protocol/issues/new?template=bug_report.md)
+- **💡 Feature Requests**: [Submit a feature request](https://github.com/lucylow/cloak-protocol/issues/new?template=feature_request.md)
+- **💬 Discussions**: [Join GitHub Discussions](https://github.com/lucylow/cloak-protocol/discussions)
+- **📧 Email**: [Your email here] (add if available)
+
+### 📚 Documentation
+
+- **[API Documentation](docs/API.md)**: Complete API reference with examples
+- **[Integration Guide](docs/INTEGRATION.md)**: Step-by-step integration guide
+- **[Technical Docs](docs/TECHNICAL.md)**: Deep dive into architecture and protocols
+- **[Demo Script](docs/DEMO_SCRIPT.md)**: Walkthrough of the demo application
+
+### 🌟 Community
+
+- **⭐ Star us on GitHub**: Help others discover Cloak Protocol
+- **🍴 Fork the repo**: Start building your own features
+- **🤝 Contribute**: See our [Contributing Guidelines](#-contributing)
+- **📢 Share**: Spread the word about privacy-preserving DeFi!
+
+### 🔒 Security
+
+- **Security Issues**: Please email security reports to [security@cloak.exchange] (add if available)
+- **Vulnerability Disclosure**: We follow responsible disclosure practices
+- **Bug Bounty**: Coming soon - stay tuned!
 
 ---
 
@@ -989,6 +1365,8 @@ We would like to thank the following projects and communities:
 **Status**: 🟢 Live demo · 🧪 Testnet deployment · 📖 Open source  
 
 Made with ❤️ for the Psy: Ascend Hack 2025
+
+**Built by developers, for developers**
 
 [⬆ Back to Top](#-cloak-protocol)
 

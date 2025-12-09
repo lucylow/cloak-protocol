@@ -1,0 +1,5 @@
+Found 2 matching lines
+frontend/src\main.tsx
+2:import { createRoot } from "react-dom/client";
+10:createRoot(rootEl).render(
+

@@ -1,0 +1,10 @@
+Found window/document usage in:
+- frontend/src\__tests__\setup.ts (mock)
+- frontend/src\main.tsx (getElementById - correct)
+- frontend/src\components\Header.tsx (scroll listener)
+- frontend/src\components\ErrorBoundary.tsx (location)
+- frontend/src\hooks\use-mobile.tsx (matchMedia, innerWidth)
+- frontend/src\components\ui\sidebar.tsx (cookie, keydown)
+
+All usages appear to be legitimate client-side code.
+

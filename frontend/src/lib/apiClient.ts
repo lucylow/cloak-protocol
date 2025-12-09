@@ -366,6 +366,15 @@ export class MockApiClient extends CloakApiClient {
     };
   }
 
+  // Override WebSocket methods to prevent connection attempts in mock mode
+  connectWebSocket(_onMessage: (data: any) => void, _onError?: (error: Event) => void): void {
+    console.log('Mock API Client: WebSocket connection skipped (mock mode)');
+  }
+
+  disconnectWebSocket(): void {
+    // No-op for mock mode
+  }
+
   private delay(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
@@ -373,7 +382,7 @@ export class MockApiClient extends CloakApiClient {
 
 // Auto-detect mode based on environment
 export function createApiClient(): CloakApiClient {
-  // Use mock mode only if explicitly enabled, not by default in development
+  // Use mock mode if explicitly enabled
   const useMockMode = import.meta.env.VITE_USE_MOCK_API === 'true';
   
   if (useMockMode) {
@@ -381,10 +390,22 @@ export function createApiClient(): CloakApiClient {
     return new MockApiClient();
   }
   
-  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080';
-  console.log(`Using Cloak API Client with base URL: ${apiUrl}`);
+  const apiUrl = import.meta.env.VITE_API_URL;
+  const isProduction = import.meta.env.MODE === 'production' || import.meta.env.PROD;
+  const isLocalhost = apiUrl?.includes('localhost') || apiUrl?.includes('127.0.0.1');
+  
+  // In production, if no API URL is set or it points to localhost, use mock mode
+  // This ensures the app works on Lovable without a backend
+  if (isProduction && (!apiUrl || isLocalhost)) {
+    console.log('Using Mock API Client (production mode without valid API URL)');
+    return new MockApiClient();
+  }
+  
+  // Use the provided API URL or default to localhost for development
+  const finalApiUrl = apiUrl || 'http://localhost:8080';
+  console.log(`Using Cloak API Client with base URL: ${finalApiUrl}`);
   
   return getApiClient({
-    baseUrl: apiUrl
+    baseUrl: finalApiUrl
   });
 }

@@ -1,0 +1,4 @@
+Found 1 matching line
+frontend/src\main.tsx
+6:const rootEl = document.getElementById("root");
+

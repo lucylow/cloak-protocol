@@ -9,6 +9,7 @@ use axum::{
     routing::{get, post},
     Router,
 };
+use futures_util::{SinkExt, StreamExt};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use tokio::sync::RwLock;
@@ -242,12 +243,13 @@ async fn ws_handler(
 }
 
 async fn handle_socket(
-    mut socket: axum::extract::ws::WebSocket,
+    socket: axum::extract::ws::WebSocket,
     state: AppState,
 ) {
     use axum::extract::ws::Message;
     use tokio::time::{interval, Duration};
     
+    let (mut sender, mut receiver) = socket.split();
     let mut interval = interval(Duration::from_secs(2));
     
     loop {
@@ -269,15 +271,16 @@ async fn handle_socket(
                     "orders": orders,
                 });
                 
-                if socket.send(Message::Text(update.to_string())).await.is_err() {
+                if sender.send(Message::Text(update.to_string())).await.is_err() {
                     break;
                 }
             }
-            result = socket.recv() => {
+            result = receiver.next() => {
                 // Handle incoming messages or connection close
                 match result {
                     Some(Ok(Message::Close(_))) => break,
                     Some(Err(_)) => break,
+                    None => break,
                     _ => {}
                 }
             }
