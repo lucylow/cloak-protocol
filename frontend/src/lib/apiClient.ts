@@ -1,8 +1,6 @@
 // Enhanced API Client for Cloak Protocol
 // Comprehensive error handling, retry logic, and type-safe requests
 
-import { ERROR_MESSAGES } from './enhancedMockData';
-
 export interface ApiResponse<T> {
   success: boolean;
   data?: T;
@@ -110,7 +108,7 @@ export class CloakApiClient {
       }
 
       // Handle specific error types
-      let errorMessage = ERROR_MESSAGES.NETWORK_ERROR;
+      let errorMessage = 'Network connection failed. Please check your internet connection.';
       let errorCode = 'NETWORK_ERROR';
 
       if (error instanceof Error) {
@@ -118,7 +116,7 @@ export class CloakApiClient {
           errorMessage = 'Request timeout. Please try again.';
           errorCode = 'TIMEOUT';
         } else if (error.message.includes('Failed to fetch')) {
-          errorMessage = ERROR_MESSAGES.BACKEND_UNAVAILABLE;
+          errorMessage = 'Backend service is currently unavailable. Retrying...';
           errorCode = 'BACKEND_UNAVAILABLE';
         } else {
           errorMessage = error.message;
@@ -286,7 +284,7 @@ export class CloakApiClient {
   }
 
   // Utility function for delays
-  private delay(ms: number): Promise<void> {
+  protected delay(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 }
@@ -384,10 +382,6 @@ export class MockApiClient extends CloakApiClient {
 
   disconnectWebSocket(): void {
     // No-op for mock mode
-  }
-
-  private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
   }
 }
 
