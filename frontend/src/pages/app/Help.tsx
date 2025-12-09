@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -141,8 +141,7 @@ const helpResources = [
   },
 ];
 
-// Fix for Code icon
-const Help = () => {
+function Help() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [contactForm, setContactForm] = useState({
@@ -357,6 +356,6 @@ const Help = () => {
       </Card>
     </div>
   );
-};
+}
 
 export default Help;
