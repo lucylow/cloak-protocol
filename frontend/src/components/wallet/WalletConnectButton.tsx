@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Wallet, ChevronDown, Copy, ExternalLink, LogOut, Check, Loader2 } from 'lucide-react';
+import { ChevronDown, Copy, ExternalLink, LogOut, Check, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -11,6 +11,27 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useWallet } from '@/hooks/useWallet';
 import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
+
+// Phantom wallet icon SVG
+const PhantomIcon = () => (
+  <svg className="h-5 w-5" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="128" height="128" rx="26.8387" fill="url(#phantom-gradient)"/>
+    <path d="M110.584 64.9142H99.142C99.142 42.7651 81.173 24.7966 58.9878 24.7966C37.2007 24.7966 19.4685 42.1723 18.8507 63.7728C18.2086 86.2298 37.6807 106.043 60.1508 106.043H63.5765C83.5874 106.043 110.584 85.3429 110.584 64.9142Z" fill="url(#phantom-gradient-2)"/>
+    <path d="M76.9457 64.4098C76.9457 68.4674 73.6544 71.7587 69.5968 71.7587C65.5392 71.7587 62.2479 68.4674 62.2479 64.4098C62.2479 60.3522 65.5392 57.0609 69.5968 57.0609C73.6544 57.0609 76.9457 60.3522 76.9457 64.4098Z" fill="#FFF"/>
+    <path d="M52.2788 64.4098C52.2788 68.4674 48.9875 71.7587 44.9299 71.7587C40.8723 71.7587 37.581 68.4674 37.581 64.4098C37.581 60.3522 40.8723 57.0609 44.9299 57.0609C48.9875 57.0609 52.2788 60.3522 52.2788 64.4098Z" fill="#FFF"/>
+    <defs>
+      <linearGradient id="phantom-gradient" x1="64" y1="0" x2="64" y2="128" gradientUnits="userSpaceOnUse">
+        <stop stopColor="#534BB1"/>
+        <stop offset="1" stopColor="#551BF9"/>
+      </linearGradient>
+      <linearGradient id="phantom-gradient-2" x1="64.7014" y1="24.7966" x2="64.7014" y2="106.043" gradientUnits="userSpaceOnUse">
+        <stop stopColor="#FFF"/>
+        <stop offset="1" stopColor="#FFF" stopOpacity="0.82"/>
+      </linearGradient>
+    </defs>
+  </svg>
+);
 
 export function WalletConnectButton() {
   const {
@@ -19,9 +40,11 @@ export function WalletConnectButton() {
     address,
     balance,
     chainName,
+    walletType,
     connect,
     disconnect,
     formatAddress,
+    isPhantomInstalled,
   } = useWallet();
 
   const [copied, setCopied] = useState(false);
@@ -41,8 +64,8 @@ export function WalletConnectButton() {
         disabled={isConnecting}
         className={cn(
           "gap-2 font-semibold transition-all duration-300",
-          "bg-gradient-to-r from-white to-gray-400 hover:from-gray-200 hover:to-gray-500",
-          "text-black shadow-lg hover:shadow-white/25",
+          "bg-gradient-to-r from-[#9945FF] to-[#14F195] hover:from-[#8835EE] hover:to-[#0DE085]",
+          "text-white shadow-lg hover:shadow-purple-500/25",
           isConnecting && "opacity-80"
         )}
       >
@@ -53,17 +76,8 @@ export function WalletConnectButton() {
           </>
         ) : (
           <>
-            <svg className="h-5 w-5" viewBox="0 0 35 33" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M32.9582 1L19.8241 10.7183L22.2665 4.99099L32.9582 1Z" fill="#E17726"/>
-              <path d="M2.66296 1L15.6778 10.809L13.3546 4.99098L2.66296 1Z" fill="#E27625"/>
-              <path d="M28.2295 23.5334L24.7346 28.872L32.2175 30.9323L34.3611 23.6501L28.2295 23.5334Z" fill="#E27625"/>
-              <path d="M1.27271 23.6501L3.40326 30.9323L10.8732 28.872L7.39143 23.5334L1.27271 23.6501Z" fill="#E27625"/>
-              <path d="M10.4706 14.5149L8.39209 17.6507L15.7909 17.9873L15.5497 9.94141L10.4706 14.5149Z" fill="#E27625"/>
-              <path d="M25.1505 14.5149L19.9934 9.85059L19.8242 17.9873L27.2099 17.6507L25.1505 14.5149Z" fill="#E27625"/>
-              <path d="M10.8733 28.872L15.3471 26.6948L11.4763 23.7012L10.8733 28.872Z" fill="#E27625"/>
-              <path d="M20.274 26.6948L24.7347 28.872L24.1448 23.7012L20.274 26.6948Z" fill="#E27625"/>
-            </svg>
-            Connect Wallet
+            <PhantomIcon />
+            {isPhantomInstalled ? 'Connect Phantom' : 'Connect Wallet'}
           </>
         )}
       </Button>
@@ -77,7 +91,7 @@ export function WalletConnectButton() {
           variant="outline"
           className="gap-2 font-mono text-sm border-border/50 bg-secondary/30 hover:bg-secondary/50"
         >
-          <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+          <div className="w-2 h-2 bg-[#14F195] rounded-full animate-pulse" />
           <span>{formatAddress(address)}</span>
           <ChevronDown className="h-4 w-4 text-muted-foreground" />
         </Button>
@@ -85,7 +99,19 @@ export function WalletConnectButton() {
       <DropdownMenuContent align="end" className="w-64">
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium">Connected Wallet</p>
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-medium">Connected Wallet</p>
+              {walletType === 'mock' && (
+                <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-amber-500 border-amber-500/50">
+                  Mock
+                </Badge>
+              )}
+              {walletType === 'phantom' && (
+                <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-purple-400 border-purple-400/50">
+                  Phantom
+                </Badge>
+              )}
+            </div>
             <p className="text-xs text-muted-foreground font-mono">{formatAddress(address)}</p>
           </div>
         </DropdownMenuLabel>
@@ -96,7 +122,7 @@ export function WalletConnectButton() {
           <div className="flex items-center justify-between text-xs">
             <span className="text-muted-foreground">Network</span>
             <span className="font-medium flex items-center gap-1.5">
-              <div className="w-2 h-2 bg-green-400 rounded-full" />
+              <div className="w-2 h-2 bg-[#14F195] rounded-full" />
               {chainName}
             </span>
           </div>
@@ -105,8 +131,8 @@ export function WalletConnectButton() {
         {/* Balances */}
         <div className="px-2 py-2 space-y-1.5">
           <div className="flex items-center justify-between text-xs">
-            <span className="text-muted-foreground">ETH</span>
-            <span className="font-mono font-medium">{balance.ETH.toFixed(4)}</span>
+            <span className="text-muted-foreground">SOL</span>
+            <span className="font-mono font-medium">{balance.SOL.toFixed(4)}</span>
           </div>
           <div className="flex items-center justify-between text-xs">
             <span className="text-muted-foreground">USDC</span>
@@ -118,7 +144,7 @@ export function WalletConnectButton() {
         
         <DropdownMenuItem onClick={copyAddress} className="cursor-pointer">
           {copied ? (
-            <Check className="h-4 w-4 mr-2 text-green-400" />
+            <Check className="h-4 w-4 mr-2 text-[#14F195]" />
           ) : (
             <Copy className="h-4 w-4 mr-2" />
           )}
@@ -127,13 +153,13 @@ export function WalletConnectButton() {
         
         <DropdownMenuItem asChild>
           <a
-            href={`https://etherscan.io/address/${address}`}
+            href={`https://solscan.io/account/${address}`}
             target="_blank"
             rel="noopener noreferrer"
             className="cursor-pointer"
           >
             <ExternalLink className="h-4 w-4 mr-2" />
-            View on Explorer
+            View on Solscan
           </a>
         </DropdownMenuItem>
         
